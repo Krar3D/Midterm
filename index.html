@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة اختبارات الاقتصاد الذكية 🧠</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- MathJax -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <!-- Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --radius: 16px;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
+        
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        header {
+            background-color: var(--bg-card);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .brand { font-size: 1.2rem; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 8px; cursor: pointer; }
+        .header-controls { display: flex; gap: 15px; font-size: 1.2rem; }
+        .header-controls i { cursor: pointer; color: var(--text-muted); transition: color 0.2s; }
+        .header-controls i:hover { color: var(--text-main); }
+
+        main {
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            min-height: calc(100vh - 70px);
+        }
+
+        /* Views */
+        .view { display: none; animation: fadeIn 0.4s ease-out; }
+        .view.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Home View */
+        .page-title { text-align: center; margin-bottom: 30px; font-weight: 800; font-size: 1.8rem; background: -webkit-linear-gradient(right, #3b82f6, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+        
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .card:hover { transform: translateY(-5px); border-color: var(--primary); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); }
+        .card::before { content: ''; position: absolute; top: 0; right: 0; width: 4px; height: 100%; background: var(--primary); }
+        
+        .card h3 { font-size: 1.2rem; margin-bottom: 10px; }
+        .card .stats { display: flex; justify-content: space-between; color: var(--text-muted); font-size: 0.9rem; }
+        
+        .btn-mixed {
+            display: block; width: 100%; padding: 15px; margin-top: 30px; background: linear-gradient(135deg, #8b5cf6, #3b82f6);
+            color: white; border: none; border-radius: var(--radius); font-size: 1.2rem; font-weight: 700; cursor: pointer;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); transition: transform 0.2s; text-align: center;
+        }
+        .btn-mixed:active { transform: scale(0.98); }
+
+        /* Setup View */
+        .setup-box { background: var(--bg-card); padding: 30px; border-radius: var(--radius); text-align: center; }
+        .setup-opt { margin: 20px 0; }
+        .setup-opt label { display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 1.1rem; cursor: pointer; }
+        .setup-opt input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--primary); }
+        
+        .btn-start { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: var(--radius); font-size: 1.2rem; font-weight: 700; margin-top: 30px; cursor: pointer; }
+
+        /* Quiz View */
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .progress-container { flex-grow: 1; height: 8px; background: var(--border); border-radius: 4px; margin: 0 15px; overflow: hidden; }
+        .progress-bar { height: 100%; background: var(--primary); width: 0%; transition: width 0.3s; }
+        .q-counter { font-weight: bold; color: var(--primary); font-size: 1.1rem; }
+        
+        .timer { display: none; font-family: monospace; font-size: 1.2rem; color: var(--warning); font-weight: bold; }
+        .streak-box { display: flex; align-items: center; gap: 5px; color: var(--warning); font-weight: bold; }
+
+        .question-box { background: var(--bg-card); padding: 25px; border-radius: var(--radius); border: 1px solid var(--border); margin-bottom: 20px; position: relative; }
+        .question-text { font-size: 1.3rem; font-weight: 700; margin-bottom: 25px; line-height: 1.5; }
+        
+        .bookmark-btn { position: absolute; top: 15px; left: 15px; color: var(--text-muted); cursor: pointer; font-size: 1.2rem; transition: 0.2s; }
+        .bookmark-btn.active { color: var(--warning); }
+
+        .options { display: flex; flex-direction: column; gap: 12px; }
+        .option {
+            background: rgba(255,255,255,0.03); border: 2px solid var(--border); padding: 15px 20px; border-radius: 12px;
+            cursor: pointer; font-size: 1.1rem; transition: all 0.2s; display: flex; align-items: center; gap: 15px;
+        }
+        .option:hover:not(.disabled) { border-color: var(--primary); background: rgba(59,130,246,0.05); }
+        .option.selected { border-color: var(--primary); background: rgba(59,130,246,0.1); }
+        .option.correct { border-color: var(--success) !important; background: rgba(16,185,129,0.1) !important; color: var(--success); }
+        .option.wrong { border-color: var(--danger) !important; background: rgba(239,68,68,0.1) !important; color: var(--danger); opacity: 0.7; }
+        .option.disabled { pointer-events: none; }
+
+        .opt-letter { background: var(--border); width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-weight: bold; font-size: 0.9rem; flex-shrink: 0; }
+        .option.correct .opt-letter { background: var(--success); color: white; }
+        .option.wrong .opt-letter { background: var(--danger); color: white; }
+
+        .tools-bar { display: flex; justify-content: space-between; margin-top: 20px; }
+        .btn-hint { background: transparent; color: var(--warning); border: 1px solid var(--warning); padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .btn-hint:hover { background: rgba(245, 158, 11, 0.1); }
+
+        .feedback-box {
+            margin-top: 20px; padding: 20px; border-radius: 12px; display: none; animation: fadeIn 0.3s;
+        }
+        .feedback-box.success { background: rgba(16,185,129,0.15); border: 1px solid var(--success); color: #a7f3d0; }
+        .feedback-box.error { background: rgba(239,68,68,0.15); border: 1px solid var(--danger); color: #fecaca; }
+        .feedback-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+        .feedback-expl { font-size: 1rem; line-height: 1.5; margin-top:10px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; }
+
+        .btn-next {
+            display: none; width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: var(--radius);
+            font-size: 1.2rem; font-weight: 700; margin-top: 20px; cursor: pointer;
+        }
+
+        /* Result View */
+        .result-container { text-align: center; background: var(--bg-card); padding: 40px 20px; border-radius: var(--radius); border: 1px solid var(--border); }
+        .circle-wrap { margin: 20px auto; width: 150px; height: 150px; background: conic-gradient(var(--primary) 0%, var(--border) 0%); border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; }
+        .circle-wrap::before { content: ""; position: absolute; width: 120px; height: 120px; background: var(--bg-card); border-radius: 50%; }
+        .circle-wrap .score-text { position: relative; font-size: 2rem; font-weight: 900; color: white; }
+        
+        .rank-title { font-size: 1.8rem; font-weight: 800; color: var(--warning); margin: 15px 0; }
+        .rank-desc { color: var(--text-muted); margin-bottom: 30px; font-size: 1.1rem; }
+        
+        .result-stats { display: flex; justify-content: center; gap: 20px; margin-bottom: 30px; }
+        .stat-box { background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; min-width: 100px; border: 1px solid var(--border); }
+        .stat-box.g { border-color: var(--success); color: var(--success); }
+        .stat-box.r { border-color: var(--danger); color: var(--danger); }
+        .stat-num { font-size: 1.5rem; font-weight: bold; display: block; }
+        .stat-lbl { font-size: 0.9rem; }
+
+        .action-btns { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; }
+        .btn { padding: 12px 20px; border: none; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 8px; justify-content: center;}
+        .btn-blue { background: var(--primary); color: white; }
+        .btn-blue:hover { background: var(--primary-hover); }
+        .btn-outline { background: transparent; border: 1px solid var(--primary); color: var(--primary); }
+        .btn-outline:hover { background: rgba(59,130,246,0.1); }
+        .btn-green { background: var(--success); color: white; }
+        
+        /* Review View */
+        .review-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;}
+        .filter-wrong { display: flex; align-items: center; gap: 8px; cursor: pointer; color: var(--text-muted); }
+        .filter-wrong input { accent-color: var(--danger); width: 18px; height: 18px; }
+        
+        .review-item { background: var(--bg-card); padding: 20px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 15px; border-left: 5px solid var(--success); }
+        .review-item.wrong { border-left-color: var(--danger); }
+        .review-q { font-weight: bold; margin-bottom: 15px; font-size: 1.1rem; }
+        .review-ans { margin-bottom: 8px; color: var(--text-muted); }
+        .review-ans.correct-text { color: var(--success); font-weight: bold; }
+        .review-ans.wrong-text { color: var(--danger); text-decoration: line-through; }
+        
+        #bookmarks-view h2 { margin-bottom: 10px; }
+
+        /* MathJax Adjustments */
+        mjx-container { text-align: right !important; display: inline-block !important; direction: ltr; }
+        
+        @media (max-width: 600px) {
+            .setup-box { padding: 20px; }
+            .action-btns { flex-direction: column; }
+            .btn { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="brand" onclick="goHome()">
+            <i class="fa-solid fa-graduation-cap"></i>
+            بوابة الاقتصاد الذكية
+        </div>
+        <div class="header-controls">
+            <i class="fa-solid fa-volume-high" id="soundToggle" onclick="toggleSound()" title="الصوت"></i>
+            <i class="fa-solid fa-bookmark" onclick="showBookmarks()" title="المحفوظات"></i>
+        </div>
+    </header>
+
+    <main>
+        <!-- 1. Home View -->
+        <div id="home-view" class="view active">
+            <h1 class="page-title">اختبارات الاقتصاد -  </h1>
+            <div class="grid" id="chapters-grid">
+                <!-- Chapters injected here -->
+            </div>
+            <button class="btn-mixed" onclick="setupQuiz('all')">
+                <i class="fa-solid fa-shuffle"></i> امتحان شامل (كل الفصول)
+            </button>
+        </div>
+
+        <!-- 2. Setup View -->
+        <div id="quiz-setup-view" class="view">
+            <div class="setup-box">
+                <h2 id="setup-title" style="margin-bottom: 20px; color: var(--primary);">إعدادات الاختبار</h2>
+                
+                <div class="setup-opt" style="margin-top: 30px;">
+                    <label>
+                        <input type="checkbox" id="timer-toggle">
+                        <i class="fa-solid fa-stopwatch"></i> تفعيل المؤقت (30 ثانية للسؤال)
+                    </label>
+                </div>
+
+                <div class="setup-opt">
+                    <label>
+                        <input type="checkbox" id="shuffle-toggle" checked>
+                        <i class="fa-solid fa-random"></i> خلط الأسئلة والخيارات
+                    </label>
+                </div>
+
+                <button class="btn-start" onclick="startQuiz()">ابدأ الاختبار 🚀</button>
+                <button class="btn-outline" style="width:100%; margin-top:10px; padding:15px; border-radius:16px; border:none;" onclick="goBack()">رجوع</button>
+            </div>
+        </div>
+
+        <!-- 3. Quiz View -->
+        <div id="quiz-view" class="view">
+            <div class="top-bar">
+                <div class="q-counter" id="q-counter">السؤال 1 من 10</div>
+                <div class="progress-container">
+                    <div class="progress-bar" id="progress-bar"></div>
+                </div>
+                <div class="timer" id="timer">00:30</div>
+                <div class="streak-box" id="streak-box" style="display:none;">
+                    <i class="fa-solid fa-fire"></i> <span id="streak-count">3</span>
+                </div>
+            </div>
+
+            <div class="question-box">
+                <i class="fa-solid fa-bookmark bookmark-btn" id="btn-bookmark" onclick="toggleBookmark()"></i>
+                <div class="question-text" id="question-text">نص السؤال هنا</div>
+                
+                <div class="options" id="options-container">
+                    <!-- Options injected here -->
+                </div>
+
+                <div class="tools-bar" id="tools-bar">
+                    <button class="btn-hint" id="btn-hint" onclick="showHint()"><i class="fa-solid fa-lightbulb"></i> تلميح</button>
+                </div>
+
+                <div class="feedback-box" id="feedback-box">
+                    <div class="feedback-title" id="feedback-title"></div>
+                    <div class="feedback-expl" id="feedback-expl"></div>
+                </div>
+            </div>
+
+            <button class="btn-next" id="btn-next" onclick="nextQuestion()">التالي <i class="fa-solid fa-arrow-left"></i></button>
+        </div>
+
+        <!-- 4. Result View -->
+        <div id="result-view" class="view">
+            <div class="result-container">
+                <h2 style="margin-bottom:10px;">انتهى الاختبار!</h2>
+                
+                <div class="circle-wrap" id="score-circle">
+                    <span class="score-text" id="score-percent">0%</span>
+                </div>
+
+                <div class="rank-title" id="rank-title">لقب التحشيش</div>
+                <div class="rank-desc" id="rank-desc">رسالة تحفيزية هنا</div>
+
+                <div class="result-stats">
+                    <div class="stat-box g">
+                        <span class="stat-num" id="stat-correct">0</span>
+                        <span class="stat-lbl">صح ✔️</span>
+                    </div>
+                    <div class="stat-box r">
+                        <span class="stat-num" id="stat-wrong">0</span>
+                        <span class="stat-lbl">غلط ❌</span>
+                    </div>
+                </div>
+
+                <div class="action-btns">
+                    <button class="btn btn-blue" onclick="showReview()"><i class="fa-solid fa-list-check"></i> مراجعة الأجوبة</button>
+                    <button class="btn btn-outline" onclick="retryWrong()" id="btn-retry-wrong"><i class="fa-solid fa-rotate-left"></i> إعادة الأغلاط فقط</button>
+                    <button class="btn btn-outline" onclick="startQuiz()"><i class="fa-solid fa-rotate"></i> إعادة الاختبار</button>
+                    <button class="btn btn-green" onclick="shareResult()"><i class="fa-solid fa-share-nodes"></i> شارك النتيجة</button>
+                    <button class="btn btn-outline" onclick="goHome(true)" style="border:none;"><i class="fa-solid fa-home"></i> الرئيسية</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. Review View -->
+        <div id="review-view" class="view">
+            <div class="review-header">
+                <h2>مراجعة الأجوبة 📋</h2>
+                <div style="display: flex; gap: 15px; align-items: center;">
+                    <label class="filter-wrong">
+                        <input type="checkbox" id="filter-wrong-cb" onchange="renderReview()">
+                        عرض الأغلاط فقط
+                    </label>
+                    <button class="btn btn-outline" style="padding: 5px 15px; font-size: 0.9rem;" onclick="goBack()">رجوع</button>
+                </div>
+            </div>
+            <div id="review-list"></div>
+            <button class="btn btn-blue" style="width:100%; margin-top:20px;" onclick="goBack()">رجوع</button>
+        </div>
+        
+        <!-- Bookmarks View -->
+        <div id="bookmarks-view" class="view">
+            <div class="review-header">
+                <h2>المحفوظات ⭐</h2>
+                <button class="btn btn-outline" style="padding: 5px 15px; font-size: 0.9rem;" onclick="goBack()">رجوع</button>
+            </div>
+            <p style="color:var(--text-muted); margin-bottom:20px;">الأسئلة اللي حفظتها حتى تراجعها بعدين.</p>
+            <div id="bookmarks-list"></div>
+            <button class="btn btn-blue" style="width:100%; margin-top:20px;" onclick="goBack()">رجوع</button>
+        </div>
+
+    </main>
+
+    <script>
+        // --- DATA ---
+        const ALL_QUESTIONS = [{"id": 1, "chapter": 1, "question": "التعبير الاقتصادي العملي عن الاحتياجات البشرية هو:", "options": ["أ. العرض", "ب. الطلب", "ج. الاستهلاك", "د. الرغبة"], "correctIndex": 1}, {"id": 2, "chapter": 1, "question": "لكي يتحقق طلب فرد ما على سلعة معينة، يجب أن تقترن رغبته بـ:", "options": ["أ. توفر السلعة في السوق", "ب. انخفاض سعر السلعة", "ج. القدرة الشرائية", "د. الحاجة الماسة"], "correctIndex": 2}, {"id": 3, "chapter": 1, "question": "الشرط الذاتي لتحقق الطلب على سلعة معينة هو:", "options": ["أ. القدرة على الدفع", "ب. الرغبة", "ج. توفر البدائل", "د. السعر المناسب"], "correctIndex": 1}, {"id": 4, "chapter": 1, "question": "الشرط الموضوعي لتحقق الطلب على سلعة معينة هو:", "options": ["أ. الرغبة", "ب. القدرة على الدفع", "ج. أذواق المستهلكين", "د. توفر السلع المكملة"], "correctIndex": 1}, {"id": 5, "chapter": 1, "question": "المتغيرات التي لا يمكن قياسها كمياً ولكن يمكن ترتيبها حسب أهميتها تسمى المتغيرات:", "options": ["أ. التابعة", "ب. الخارجية", "ج. النوعية", "د. المستقلة"], "correctIndex": 2}, {"id": 6, "chapter": 1, "question": "التغير في أسعار السلع الاعتيادية يمارس تأثيراً على الكميات المطلوبة منها يصف بأنه:", "options": ["أ. تأثير طردي", "ب. تأثير عكسي", "ج. تأثير معدوم", "د. تأثير متذبذب"], "correctIndex": 1}, {"id": 7, "chapter": 1, "question": "تراجع رغبة الفرد بالحصول على وحدات إضافية من نفس السلعة بدءاً من الوحدة الثانية يفسره قانون:", "options": ["أ. العرض والطلب", "ب. تناقص الغلة", "ج. تناقص المنفعة الحدية", "د. تناقص التكاليف"], "correctIndex": 2}, {"id": 8, "chapter": 1, "question": "زيادة دخل المستهلك تؤدي عادة إلى زيادة الكميات المطلوبة من السلع الاعتيادية، مما يعني وجود علاقة:", "options": ["أ. عكسية", "ب. طردية", "ج. صفرية", "د. ثابتة"], "correctIndex": 1}, {"id": 9, "chapter": 1, "question": "السلع التي يقل طلب المستهلك عليها إذا ارتفع دخله (مثل الملابس المستعملة) تسمى:", "options": ["أ. السلع الكمالية", "ب. السلع البديلة", "ج. السلع المكملة", "د. السلع الرديئة"], "correctIndex": 3}, {"id": 10, "chapter": 1, "question": "السلعة التي تعطي إشباعاً مماثلاً أو مقارباً لإشباع سلعة أخرى (مثل لحم البقر كبديل للغنم) تسمى:", "options": ["أ. السلعة الأصلية", "ب. السلعة البديلة", "ج. السلعة المكملة", "د. السلعة الرديئة"], "correctIndex": 1}, {"id": 11, "chapter": 1, "question": "العلاقة بين التغير في سعر السلعة البديلة والكمية المطلوبة من السلعة الأصلية هي علاقة:", "options": ["أ. طردية", "ب. عكسية", "ج. غير مترابطة", "د. متناقصة"], "correctIndex": 0}, {"id": 12, "chapter": 1, "question": "السلعة التي يكون وجودها ضرورياً لتحقق الإشباع الكامل من السلعة الأصلية تسمى:", "options": ["أ. السلعة البديلة", "ب. السلعة المكملة", "ج. السلعة الضرورية", "د. السلعة المستقلة"], "correctIndex": 1}, {"id": 13, "chapter": 1, "question": "ارتفاع سعر السلعة المكملة (مثل السكر) يؤدي إلى:", "options": ["أ. زيادة الكمية المطلوبة من السلعة الأصلية", "ب. خفض الكمية المطلوبة من السلعة الأصلية", "ج. عدم تأثر السلعة الأصلية", "د. انخفاض سعر السلعة الأصلية"], "correctIndex": 1}, {"id": 14, "chapter": 1, "question": "نشاط الترويج والإعلان من أهم العوامل التي تؤثر على:", "options": ["أ. توزيع الدخل القومي", "ب. أذواق أو تفضيلات المستهلكين", "ج. حجم السكان", "د. أسعار السلع البديلة"], "correctIndex": 1}, {"id": 15, "chapter": 1, "question": "يميل الاقتصاديون عند دراسة الطلب إلى اعتبار معدل نمو السكان ونمط توزيع الدخل القومي كمتغيرين:", "options": ["أ. تابعين", "ب. داخليين", "ج. خارجيين (Exogenous)", "د. كميين فقط"], "correctIndex": 2}, {"id": 16, "chapter": 1, "question": "في دالة الطلب الرياضية \\( Qd = f(P, MI, Pn) \\)، تقتصر العلاقة على الكمية المطلوبة و:", "options": ["أ. المتغيرات النوعية فقط", "ب. المتغيرات الكمية فقط", "ج. حجم السكان وأذواق المستهلكين", "د. معدل التضخم"], "correctIndex": 1}, {"id": 17, "chapter": 1, "question": "المرونة التي تعبر عن مدى استجابة الكمية المطلوبة للتغير الحاصل في سعر السلعة نفسها هي:", "options": ["أ. المرونة الدخلية", "ب. المرونة التقاطعية", "ج. المرونة السعرية", "د. المرونة التعزيزية"], "correctIndex": 2}, {"id": 18, "chapter": 1, "question": "عندما يكون التغير النسبي في الكمية المطلوبة أكبر من التغير النسبي في السعر، يوصف الطلب بأنه:", "options": ["أ. غير مرن", "ب. متكافئ المرونة", "ج. عالي المرونة", "د. عديم المرونة"], "correctIndex": 2}, {"id": 19, "chapter": 1, "question": "يطلق على السلعة ذات الطلب المرن (قيمة المرونة أكبر من 1) بأنها:", "options": ["أ. سلعة ضرورية", "ب. سلعة كمالية", "ج. سلعة رديئة", "د. سلعة مكملة"], "correctIndex": 1}, {"id": 20, "chapter": 1, "question": "إذا ارتفع السعر من 100 إلى 110 وحدة نقدية، وانخفضت الكمية من 1000 إلى 600 وحدة، فإن معامل المرونة السعرية (Ed) يساوي:", "options": ["أ. -2", "ب. -4", "ج. 4", "د. -0.4"], "correctIndex": 1}, {"id": 21, "chapter": 1, "question": "الطلب الذي يؤدي فيه التغير النسبي في السعر إلى تغير نسبي أقل في الكمية المطلوبة يسمى:", "options": ["أ. الطلب عالي المرونة", "ب. الطلب أحادي المرونة", "ج. الطلب قليل المرونة", "د. الطلب عديم المرونة"], "correctIndex": 2}, {"id": 22, "chapter": 1, "question": "في حالة الطلب قليل المرونة، تكون قيمة معامل المرونة السعرية:", "options": ["أ. أكبر من واحد", "ب. أقل من واحد وأكبر من صفر (بالقيمة المطلقة)", "ج. تساوي واحداً صحيحاً", "د. تساوي صفراً"], "correctIndex": 1}, {"id": 23, "chapter": 1, "question": "تعرف السلعة ذات الطلب قليل المرونة بأنها:", "options": ["أ. سلعة كمالية", "ب. سلعة ضرورية", "ج. سلعة رديئة", "د. سلعة بديلة"], "correctIndex": 1}, {"id": 24, "chapter": 1, "question": "إذا انخفض السعر من 200 إلى 100، وزادت الكمية من 1000 إلى 1050، فإن معامل المرونة هو \\( (-0.1) \\). هذا الطلب يعتبر:", "options": ["أ. مرن", "ب. متكافئ المرونة", "ج. غير مرن (قليل المرونة)", "د. عديم المرونة"], "correctIndex": 2}, {"id": 25, "chapter": 1, "question": "الطلب الذي يؤدي فيه التغير النسبي في السعر إلى تغير نسبي معادل (مساوٍ) في الكمية المطلوبة يسمى:", "options": ["أ. الطلب المرن", "ب. الطلب أحادي المرونة", "ج. الطلب غير المرن", "د. الطلب لا نهائي المرونة"], "correctIndex": 1}, {"id": 26, "chapter": 1, "question": "في حالة الطلب أحادي المرونة، تكون قيمة معامل المرونة مساوية لـ:", "options": ["أ. صفر", "ب. ما لا نهاية", "ج. واحد", "د. أقل من واحد"], "correctIndex": 2}, {"id": 27, "chapter": 1, "question": "الطلب الذي لا تؤدي فيه أي تغيرات نسبية في السعر إلى أي تغير في الكمية المطلوبة يسمى:", "options": ["أ. الطلب قليل المرونة", "ب. الطلب عديم المرونة", "ج. الطلب أحادي المرونة", "د. الطلب عالي المرونة"], "correctIndex": 1}, {"id": 28, "chapter": 1, "question": "من الأمثلة على السلع ذات الطلب عديم المرونة:", "options": ["أ. الملابس الفاخرة", "ب. السيارات", "ج. الدواء", "د. اللحوم"], "correctIndex": 2}, {"id": 29, "chapter": 1, "question": "في حالة الطلب عديم المرونة، يكون منحنى الطلب:", "options": ["أ. أفقياً موازياً لمحور الكميات", "ب. منحدراً نحو اليمين", "ج. متصاعداً نحو اليمين", "د. عمودياً"], "correctIndex": 3}, {"id": 30, "chapter": 1, "question": "الطلب الذي يؤدي فيه تغير طفيف جداً في السعر إلى تغير لا نهائي في الكمية المطلوبة يسمى:", "options": ["أ. الطلب المرن", "ب. الطلب أحادي المرونة", "ج. الطلب لا نهائي المرونة", "د. الطلب عديم المرونة"], "correctIndex": 2}, {"id": 31, "chapter": 1, "question": "منحنى الطلب لا نهائي المرونة يكون على شكل خط:", "options": ["أ. عمودي", "ب. موازي للمحور الأفقي", "ج. منحدر بحدة", "د. متصاعد"], "correctIndex": 1}, {"id": 32, "chapter": 1, "question": "العلاقة بين درجة انحدار منحنى الطلب والمرونة السعرية هي:", "options": ["أ. كلما زاد الانحدار زادت المرونة", "ب. كلما زاد الانحدار قلت المرونة", "ج. لا توجد علاقة بينهما", "د. علاقة طردية دائماً"], "correctIndex": 1}, {"id": 33, "chapter": 1, "question": "المرونة التي تبين استجابة الكمية المطلوبة من سلعة (x) للتغير في سعر سلعة أخرى (y) تسمى:", "options": ["أ. المرونة الدخلية", "ب. المرونة التعزيزية", "ج. مرونة الطلب التقاطعية", "د. المرونة السعرية"], "correctIndex": 2}, {"id": 34, "chapter": 1, "question": "إذا كانت إشارة مرونة الطلب التقاطعية \\( (Ed_{x,y}) \\) موجبة، فهذا يعني أن السلعتين (x و y):", "options": ["أ. مكملتان", "ب. بديلتان", "ج. مستقلتان", "د. رديئتان"], "correctIndex": 1}, {"id": 35, "chapter": 1, "question": "إذا كانت إشارة مرونة الطلب التقاطعية \\( (Ed_{x,y}) \\) سالبة، فهذا يعني أن السلعتين:", "options": ["أ. مكملتان", "ب. بديلتان", "ج. مستقلتان", "د. ضروريتان"], "correctIndex": 0}, {"id": 36, "chapter": 1, "question": "إذا كانت مرونة الطلب التقاطعية تساوي صفراً، فهذا يدل على أن السلعتين:", "options": ["أ. مكملتان تماماً", "ب. بديلتان تماماً", "ج. مستقلتان ولا توجد بينهما علاقة", "د. سلعتي جيفن"], "correctIndex": 2}, {"id": 37, "chapter": 1, "question": "المرونة التي تعكس دور أذواق المستهلكين في تحديد الكميات المطلوبة هي:", "options": ["أ. المرونة التقاطعية", "ب. المرونة الدخلية", "ج. المرونة السعرية", "د. مرونة الطلب التعزيزية"], "correctIndex": 3}, {"id": 38, "chapter": 1, "question": "المؤشر الكمي البديل المستخدم لحساب المرونة التعزيزية بدلاً من الذوق الذي لا يمكن قياسه هو:", "options": ["أ. التغير في الدخل", "ب. التغير في أسعار السلع الأخرى", "ج. تكاليف ترويج المشروع للسلعة", "د. حجم السكان"], "correctIndex": 2}, {"id": 39, "chapter": 1, "question": "إذا كانت المرونة التعزيزية سالبة، فهذا يشير إلى:", "options": ["أ. تحسن في نظرة المستهلكين للسلعة", "ب. تراجع في نظرة المستهلكين تجاه السلعة", "ج. زيادة الدخل القومي", "د. انخفاض تكاليف الإنتاج"], "correctIndex": 1}, {"id": 40, "chapter": 1, "question": "المرونة التي تقيس استجابة الكمية المطلوبة من سلعة معينة للتغير في دخل المستهلك تسمى:", "options": ["أ. المرونة السعرية", "ب. المرونة التعزيزية", "ج. المرونة التقاطعية", "د. مرونة الطلب الدخلية"], "correctIndex": 3}, {"id": 41, "chapter": 1, "question": "إذا كانت إشارة معامل المرونة الدخلية سالبة، فهذا يدل على أن السلعة:", "options": ["أ. ضرورية", "ب. كمالية", "ج. رديئة", "د. اعتيادية"], "correctIndex": 2}, {"id": 42, "chapter": 1, "question": "إذا كانت إشارة معامل المرونة الدخلية موجبة، فهذا يدل على أن السلعة:", "options": ["أ. رديئة", "ب. دنيا", "ج. مستقلة", "د. اعتيادية"], "correctIndex": 3}, {"id": 43, "chapter": 1, "question": "منحنى الطلب للسلع الاعتيادية يعبر عن قانون الطلب، وبالتالي فإنه:", "options": ["أ. يتصاعد من أسفل اليسار إلى أعلى اليمين", "ب. يكون أفقياً تماماً", "ج. يكون عمودياً تماماً", "د. يبدأ من أعلى اليسار وينحدر نحو اليمين"], "correctIndex": 3}, {"id": 44, "chapter": 1, "question": "أثبت الاقتصادي \"جيفين\" أن الأفراد ذوي الدخول المنخفضة جداً يتصرفون تجاه بعض السلع الغذائية الأساسية الرخيصة بشكل:", "options": ["أ. يطابق قانون الطلب تماماً", "ب. مناقض لقانون الطلب", "ج. لا يتأثر بالسعر نهائياً", "د. يتأثر بالترويج فقط"], "correctIndex": 1}, {"id": 45, "chapter": 1, "question": "عند انخفاض سعر \"السلعة الدنيا\" (مثل الخبز أو الملابس المستعملة)، فإن المستهلك الفقير سيتجه إلى:", "options": ["أ. زيادة الكمية المطلوبة منها بشكل كبير", "ب. تخفيض الكمية المطلوبة منها واستبدالها بسلع أفضل", "ج. الادخار وتجنب الاستهلاك", "د. شراء سلع دنيا أخرى فقط"], "correctIndex": 1}, {"id": 46, "chapter": 1, "question": "منحنى الطلب في حالة \"السلع الدنيا\" (سلع جيفين) يبدأ من:", "options": ["أ. أعلى اليسار وينحدر لليمين", "ب. أسفل اليسار ويتصاعد لليمين", "ج. موازياً لمحور الكميات", "د. موازياً لمحور الأسعار"], "correctIndex": 1}, {"id": 47, "chapter": 1, "question": "العلاقة بين دخول الأفراد والكميات المطلوبة من \"السلع الدنيا\" (مثل الملابس المستعملة) هي علاقة:", "options": ["أ. طردية", "ب. عكسية", "ج. ثابتة", "د. صفرية"], "correctIndex": 1}, {"id": 48, "chapter": 1, "question": "السلع الاستفزازية أو سلع المباهاة (Veblen Goods) هي استثناء من قانون الطلب يتصل بسلوك:", "options": ["أ. الفقراء وذوي الدخول الواطئة", "ب. الطبقة الوسطى", "ج. الأغنياء وذوي الدخول المرتفعة", "د. المستهلكين العقلانيين"], "correctIndex": 2}, {"id": 49, "chapter": 1, "question": "من أمثلة سلع المباهاة (Veblen Goods):", "options": ["أ. الملابس المستعملة والخبز", "ب. الجواهر الثمينة والتحف الفنية النادرة", "ج. السلع الأساسية المدعومة", "د. الأدوية الضرورية"], "correctIndex": 1}, {"id": 50, "chapter": 1, "question": "ارتفاع أسعار سلع المباهاة يؤدي إلى:", "options": ["أ. تخفيض الكميات المطلوبة منها", "ب. زيادة الكميات المطلوبة منها", "ج. بقاء الكميات المطلوبة ثابتة", "د. انخفاض مرونتها السعرية إلى الصفر"], "correctIndex": 1}, {"id": 51, "chapter": 1, "question": "في حالة سلع المباهاة، العلاقة بين دخول الأفراد الأغنياء والكميات المطلوبة منها هي علاقة:", "options": ["أ. عكسية", "ب. صفرية", "ج. طردية", "د. متناقصة"], "correctIndex": 2}, {"id": 52, "chapter": 1, "question": "إذا ارتفع سعر سلعة ما، وتوقع المشترون أن سعرها سيرتفع بنسبة أكبر في المستقبل القريب، فإن الكمية المطلوبة حالياً:", "options": ["أ. ستنخفض بشكل كبير", "ب. ستبقى ثابتة", "ج. ستزداد", "د. ستنخفض تدريجياً"], "correctIndex": 2}, {"id": 53, "chapter": 1, "question": "تأثير التوقعات على قانون الطلب يكون أكثر وضوحاً إذا كانت السلعة:", "options": ["أ. سريعة التلف", "ب. قابلة للخزن", "ج. ضرورية جداً", "د. كمالية غير قابلة للتخزين"], "correctIndex": 1}, {"id": 54, "chapter": 1, "question": "طلب السوق من سلعة معينة يمثل:", "options": ["أ. طلب الفرد ذو الدخل الأعلى في السوق", "ب. متوسط الكميات التي يطلبها المستهلكون", "ج. مجموع الكميات التي يطلبها كافة المستهلكين عند مستويات سعرية مختلفة", "د. الكمية المعروضة مطروحاً منها الكمية المطلوبة"], "correctIndex": 2}, {"id": 55, "chapter": 1, "question": "يمكن التوصل إلى منحنى طلب السوق من خلال:", "options": ["أ. جمع منحنيات العرض للمنتجين", "ب. معرفة منحنيات الطلب الفردي للمستهلكين وجمعها", "ج. حساب متوسط أسعار السلع البديلة", "د. قياس المرونة التعزيزية"], "correctIndex": 1}, {"id": 56, "chapter": 1, "question": "الإيراد الكلي (TR) للمشروع يمثل:", "options": ["أ. التكاليف مطروحاً منها الأرباح", "ب. حاصل ضرب الكمية المطلوبة في سعر الوحدة \\( (TR = Q \\times P) \\)", "ج. مجموع الإنفاق الحكومي على السلعة", "د. التغير في السعر مقسوماً على التغير في الكمية"], "correctIndex": 1}, {"id": 57, "chapter": 1, "question": "حجم الإنفاق الكلي الذي يقوم به المستهلكون لشراء سلعة ما هو نفسه:", "options": ["أ. الإيراد الحدي للمشروع", "ب. الإيراد الكلي الذي يحصل عليه المشروع", "ج. مرونة الطلب السعرية", "د. تكلفة الإنتاج"], "correctIndex": 1}, {"id": 58, "chapter": 1, "question": "إذا كان الطلب عالي المرونة (\\( Ed > 1 \\))، فإن ارتفاع السعر يؤدي إلى:", "options": ["أ. زيادة الإيراد الكلي", "ب. انخفاض الإيراد الكلي", "ج. بقاء الإيراد الكلي ثابتاً", "د. تذبذب الإيراد الكلي"], "correctIndex": 1}, {"id": 59, "chapter": 1, "question": "إذا كان الطلب قليل المرونة (\\( Ed < 1 \\))، فإن انخفاض السعر يؤدي إلى:", "options": ["أ. ارتفاع الإيراد الكلي", "ب. انخفاض الإيراد الكلي", "ج. لا يتغير الإيراد الكلي", "د. زيادة الإيراد الحدي إلى ما لا نهاية"], "correctIndex": 1}, {"id": 60, "chapter": 1, "question": "في حالة الطلب قليل المرونة (\\( Ed < 1 \\))، التغير في الإيراد الكلي يسير:", "options": ["أ. في نفس اتجاه التغير في السعر", "ب. في عكس اتجاه التغير في السعر", "ج. لا يتأثر بالتغير في السعر", "د. نحو الصفر دائماً"], "correctIndex": 0}, {"id": 61, "chapter": 1, "question": "إذا كان الطلب أحادي (متكافئ) المرونة (\\( Ed = 1 \\))، فإن تغير السعر (ارتفاعاً أو انخفاضاً) يؤدي إلى:", "options": ["أ. تغير معاكس في الإيراد الكلي", "ب. تغير طردي في الإيراد الكلي", "ج. لا يؤدي إلى تغير في الإيراد الكلي", "د. تذبذب حاد في الإيراد الكلي"], "correctIndex": 2}, {"id": 62, "chapter": 1, "question": "في حالة الطلب أحادي المرونة، لا يتغير الإيراد الكلي لأن:", "options": ["أ. التغير بالكمية المطلوبة أكبر من التغير بالسعر", "ب. التغير بالكمية المطلوبة أقل من التغير بالسعر", "ج. التغير بالكمية المطلوبة يساوي التغير بالسعر", "د. الكمية المطلوبة ثابتة لا تتغير"], "correctIndex": 2}, {"id": 63, "chapter": 1, "question": "إذا كان الطلب عديم المرونة تماماً (\\( Ed = 0 \\))، فإن ارتفاع السعر يؤدي إلى:", "options": ["أ. انخفاض الإيراد الكلي", "ب. ارتفاع الإيراد الكلي", "ج. بقاء الإيراد الكلي ثابتاً", "د. انخفاض الكمية المطلوبة للصفر"], "correctIndex": 1}, {"id": 64, "chapter": 1, "question": "إذا كان الطلب لا نهائي المرونة (\\( Ed = \\infty \\))، فإن ارتفاع السعر سيؤدي إلى:", "options": ["أ. ارتفاع الإيراد الكلي بصورة لانهائية", "ب. انخفاض الإيراد الكلي إلى الصفر", "ج. بقاء الإيراد الكلي ثابتاً", "د. زيادة الكمية المطلوبة"], "correctIndex": 1}, {"id": 65, "chapter": 1, "question": "الإيراد الحدي (MR) يعرف بأنه:", "options": ["أ. إجمالي الإيرادات في نهاية السنة", "ب. التغير في الإيراد الكلي مقسوماً على التغير المقابل في الناتج", "ج. سعر الوحدة مضروباً في المرونة", "د. الإيراد الكلي مقسوماً على السعر"], "correctIndex": 1}, {"id": 66, "chapter": 1, "question": "في ظروف المنافسة التامة، حيث يستطيع المشروع بيع أي وحدات بالسعر السائد، فإن الإيراد الحدي:", "options": ["أ. يكون أقل من السعر", "ب. يكون مساوياً لسعر وحدة السلعة", "ج. يكون أكبر من السعر", "د. يكون سالباً"], "correctIndex": 1}, {"id": 67, "chapter": 1, "question": "عندما يلجأ المشروع لتخفيض السعر لغرض زيادة المبيعات (خارج المنافسة التامة)، فإن العلاقة بين السعر والإيراد الحدي تصبح:", "options": ["أ. \\( P < MR \\)", "ب. \\( P = MR \\)", "ج. \\( P > MR \\)", "د. P = 0"], "correctIndex": 2}, {"id": 68, "chapter": 1, "question": "العلاقة الرياضية التي تربط بين الإيراد الحدي (MR)، السعر (P)، ومرونة الطلب (Ed) هي:", "options": ["أ. \\( MR = P \\left[ 1 + \\frac{1}{Ed} \\right] \\)", "ب. \\( MR = P \\left[ 1 - \\frac{1}{Ed} \\right] \\)", "ج. \\( MR = \\frac{P}{Ed} \\)", "د. \\( MR = Ed [1 - P] \\)"], "correctIndex": 1}, {"id": 69, "chapter": 1, "question": "إذا كان الطلب مرناً (\\( Ed > 1 \\))، فإن الإيراد الحدي (MR) يكون:", "options": ["أ. مساوياً للصفر", "ب. سالباً (\\( MR < 0 \\))", "ج. موجباً (\\( MR > 0 \\))", "د. غير محدد"], "correctIndex": 2}, {"id": 70, "chapter": 2, "question": "يمثل عرض السوق الكميات التي يرتضي البائعون والمنتجون بيعها في وقت معين مقابل:", "options": ["أ. مستوى ثابت من الأسعار", "ب. مستويات مختلفة من الأسعار", "ج. مستويات مختلفة من الدخل", "د. أسعار السلع البديلة فقط"], "correctIndex": 1}, {"id": 71, "chapter": 2, "question": "العلاقة التي يمثلها جدول العرض بين السعر والكمية المعروضة هي علاقة:", "options": ["أ. عكسية", "ب. موجبة (طردية)", "ج. ثابتة", "د. صفرية"], "correctIndex": 1}, {"id": 72, "chapter": 2, "question": "الفرق بين \"العرض\" و \"الكمية المعروضة\" هو أن:", "options": ["أ. العرض هو نقطة محددة، والكمية المعروضة هي كافة العلاقة.", "ب. العرض يمثل كافة العلاقة (قائمة الكميات)، بينما الكمية المعروضة تنصرف إلى نقطة محددة (كمية معينة).", "ج. لا يوجد فرق بينهما.", "د. العرض يتأثر بالدخل والكمية المعروضة تتأثر بالسعر."], "correctIndex": 1}, {"id": 73, "chapter": 2, "question": "تنطلق العلاقة الطردية بين السعر والكمية المعروضة من هدف المنتجين المتمثل في:", "options": ["أ. تعظيم التكاليف", "ب. تعظيم الأرباح", "ج. تقليل الإنتاج", "د. زيادة الواردات"], "correctIndex": 1}, {"id": 74, "chapter": 2, "question": "عند زيادة سعر سلعة ما (مع ثبات الأمور الأخرى)، فإن المنتجين يميلون إلى:", "options": ["أ. تقليل إنتاج هذه السلعة", "ب. تحويل المصادر من إنتاج سلع أخرى إلى إنتاج هذه السلعة", "ج. إغلاق المصانع", "د. زيادة أسعار السلع البديلة"], "correctIndex": 1}, {"id": 75, "chapter": 2, "question": "يفترض جدول العرض أن الكميات المعروضة تتأثر فقط بـ:", "options": ["أ. أذواق المستهلكين", "ب. الأسعار المحتملة لنفس السلعة", "ج. أسعار مستلزمات الإنتاج", "د. الإعانات الحكومية"], "correctIndex": 1}, {"id": 76, "chapter": 2, "question": "عند تعريف العرض، يرتبط كل مستوى من الكميات المعروضة بسعر معين و:", "options": ["أ. عدد محدد من العمال", "ب. زمن محدد (فترة زمنية)", "ج. موقع جغرافي ثابت", "د. تكنولوجيا ثابتة"], "correctIndex": 1}, {"id": 77, "chapter": 2, "question": "في العلاقة الدالية للعرض \\( Qs=f(P) \\) ، يعتبر السعر (P):", "options": ["أ. المتغير التابع", "ب. المتغير المستقل", "ج. متغيراً خارجياً", "د. متغيراً ثانوياً"], "correctIndex": 1}, {"id": 78, "chapter": 2, "question": "المبرر الآخر (غير تعظيم الأرباح) للعلاقة الطردية بين السعر والكمية المعروضة يتصل بـ:", "options": ["أ. انخفاض الضرائب", "ب. نفقة (تكلفة) الإنتاج", "ج. زيادة الإعانات", "د. مرونة الطلب"], "correctIndex": 1}, {"id": 79, "chapter": 2, "question": "زيادة الإنتاج من سلعة ما يستلزم سحب مصادر وعناصر إنتاج من سلع أخرى، مما يؤدي إلى:", "options": ["أ. انخفاض متوسط تكلفة إنتاج وحدة السلعة", "ب. ارتفاع مطرد في تكلفة إنتاجها", "ج. ثبات تكلفة الإنتاج", "د. زيادة كفاءة جميع عناصر الإنتاج"], "correctIndex": 1}, {"id": 80, "chapter": 2, "question": "عرض الصناعة (العرض الكلي للسلعة في السوق) يتكون من:", "options": ["أ. عرض أكبر مشروع في السوق فقط", "ب. مجموع منحنيات العرض المختلفة للمشاريع المنتجة لنفس السلعة", "ج. متوسط الكميات المعروضة من جميع المشاريع", "د. العرض الحكومي للسلعة"], "correctIndex": 1}, {"id": 81, "chapter": 2, "question": "منحنى عرض السلعة في السوق (عرض الصناعة) يأخذ نفس اتجاه منحنى عرض المشروع، أي أنه:", "options": ["أ. ينطلق من أعلى اليسار وينحدر نحو اليمين", "ب. يكون موازياً للمحور الأفقي", "ج. ينطلق من أسفل اليسار، ويتصاعد نحو اليمين", "د. يكون عمودياً تماماً"], "correctIndex": 2}, {"id": 82, "chapter": 2, "question": "إذا ارتفعت أسعار مستلزمات الإنتاج، فإن ذلك يؤدي إلى:", "options": ["أ. انخفاض تكلفة الإنتاج وزيادة إمكانات العرض", "ب. زيادة تكلفة الإنتاج والتأثير سلباً على إمكانات العرض", "ج. عدم تأثر إمكانات العرض", "د. زيادة الأرباح للمنتجين"], "correctIndex": 1}, {"id": 83, "chapter": 2, "question": "إذا كان إنتاج سلعة يتطلب مستلزمات عامة (تشترك في إنتاج سلع أخرى)، فإن ذلك يؤثر على استجابة الكمية المعروضة بشكل:", "options": ["أ. سلبي", "ب. إيجابي (يتيح إمكانية تحويل المستلزمات)", "ج. معدوم", "د. غير محدد"], "correctIndex": 1}, {"id": 84, "chapter": 2, "question": "تحسن الفن الإنتاجي (التقنية) يؤدي إلى:", "options": ["أ. زيادة التكلفة المتوسطة وتقليل العرض", "ب. تخفيض التكلفة المتوسطة لإنتاج الوحدة والتأثير إيجابياً على استجابة العرض", "ج. ثبات التكلفة واستقرار العرض", "د. تقليل أرباح المنتجين"], "correctIndex": 1}, {"id": 85, "chapter": 2, "question": "في الأجل القصير، الزيادة الكبيرة أو المهمة في الإنتاج استجابة لارتفاع السعر تكون:", "options": ["أ. ممكنة دائماً بسهولة", "ب. غير ممكنة حتى تحصل زيادات في مقادير المستلزمات الثابتة", "ج. تعتمد على الضرائب فقط", "د. ممكنة عن طريق تقليل ساعات العمل"], "correctIndex": 1}, {"id": 86, "chapter": 2, "question": "إذا كان ارتفاع سعر السلعة مؤقتاً، فقد يرى المشروع أنه من غير المجدي اقتصادياً:", "options": ["أ. زيادة وجبات العمل", "ب. زيادة كمية المواد الخام", "ج. زيادة معدات الإنتاج والمنشآت الثابتة", "د. توظيف عمال إضافيين مؤقتين"], "correctIndex": 2}, {"id": 87, "chapter": 2, "question": "إذا كانت إمكانات التخزين متاحة للسلعة، فإن انخفاض سعرها يمكن أن يؤدي إلى:", "options": ["أ. زيادة الكمية المعروضة في السوق", "ب. تقليل الكمية المعروضة عن طريق سحبها من السوق وتخزينها", "ج. بقاء الكمية المعروضة ثابتة", "د. إتلاف السلعة"], "correctIndex": 1}, {"id": 88, "chapter": 2, "question": "زيادة الإعانات التي تقدمها الدولة لإنتاج سلعة معينة يؤدي إلى:", "options": ["أ. ارتفاع تكلفة الإنتاج وتخفيض العرض", "ب. تخفيض تكلفة الإنتاج بمقدار الإعانة، مما يؤثر إيجابياً على العرض", "ج. عدم تأثر منحنى العرض", "د. انخفاض أرباح المنتجين"], "correctIndex": 1}, {"id": 89, "chapter": 2, "question": "زيادة الضرائب المفروضة على إنتاج السلعة يؤدي إلى:", "options": ["أ. انخفاض تكلفة الإنتاج وزيادة العرض", "ب. ارتفاع تكلفة إنتاج السلعة وتقليل استجابة العرض", "ج. بقاء تكلفة الإنتاج ثابتة", "د. زيادة الدعم الحكومي للمنتج"], "correctIndex": 1}, {"id": 90, "chapter": 2, "question": "مرونة العرض (\\( Es \\)) تمثل:", "options": ["أ. التغير المطلق في الكمية مقسوماً على التغير المطلق في السعر", "ب. درجة استجابة الكمية المعروضة للتغير في السعر", "ج. استجابة الكمية المعروضة للتغير في الدخل", "د. التغير النسبي في السعر مقسوماً على التغير النسبي في الكمية"], "correctIndex": 1}, {"id": 91, "chapter": 2, "question": "إذا كان التغير النسبي في السعر يؤدي إلى تغير نسبي أكبر في الكمية المعروضة، فإن العرض يوصف بأنه:", "options": ["أ. غير مرن", "ب. أحادي المرونة", "ج. مرن (عالي المرونة)", "د. عديم المرونة"], "correctIndex": 2}, {"id": 92, "chapter": 2, "question": "في حالة العرض عالي المرونة \\( (\\( Es \\) > 1) \\)، فإن منحنى العرض:", "options": ["أ. يقترب من (أو ينكفئ على) المحور الأفقي", "ب. يقترب من المحور العمودي", "ج. يكون عمودياً تماماً", "د. يقسم زاوية الأصل بالتساوي"], "correctIndex": 0}, {"id": 93, "chapter": 2, "question": "العرض الذي يؤدي فيه التغير النسبي في السعر إلى تغير نسبي مماثل (مساوٍ) في الكمية المعروضة يسمى:", "options": ["أ. عرض قليل المرونة", "ب. عرض متكافئ (أحادي) المرونة", "ج. عرض مرن جداً", "د. عرض لا نهائي المرونة"], "correctIndex": 1}, {"id": 94, "chapter": 2, "question": "في حالة العرض أحادي المرونة \\( (\\( Es \\) = 1) \\)، منحنى العرض يتمثل في:", "options": ["أ. خط مواز للمحور الأفقي", "ب. خط مواز للمحور العمودي", "ج. خط مستقيم ينبع من نقطة الأصل ويقسم زاوية الأصل إلى زاويتين متساويتين (45 درجة)", "د. منحنى يقطع المحور الصادي فقط"], "correctIndex": 2}, {"id": 95, "chapter": 2, "question": "العرض الذي تكون درجة مرونته أقل من الواحد الصحيح \\( (\\( Es \\) < 1) \\) يسمى:", "options": ["أ. عرضاً مرناً", "ب. عرضاً متكافئاً", "ج. عرضاً واطئ المرونة (غير مرن)", "د. عرضاً عديم المرونة تماماً"], "correctIndex": 2}, {"id": 96, "chapter": 2, "question": "في حالة العرض واطئ المرونة، يصبح منحنى العرض:", "options": ["أ. موازياً للمحور الأفقي", "ب. أشد انحداراً (الزاوية مع المحور السيني أكبر نسبياً)", "ج. أفقياً تماماً", "د. ينحدر من أعلى اليسار لأسفل اليمين"], "correctIndex": 1}, {"id": 97, "chapter": 2, "question": "الحالة التي تظل فيها الكمية المعروضة ثابتة رغم تغير سعر السلعة \\( (\\( Es \\) = 0) \\) تسمى:", "options": ["أ. عرض عديم المرونة تماماً", "ب. عرض لا نهائي المرونة", "ج. عرض أحادي المرونة", "د. عرض مرن"], "correctIndex": 0}, {"id": 98, "chapter": 2, "question": "من الأمثلة على العرض عديم المرونة تماماً في الأمد القصير:", "options": ["أ. عرض السيارات", "ب. عرض الأرض كعنصر إنتاجي", "ج. عرض المواد الغذائية", "د. عرض الملابس"], "correctIndex": 1}, {"id": 99, "chapter": 2, "question": "الحالة التي يكون فيها المنتجون على استعداد لعرض أية كمية من السلعة بالسعر السائد \\( (\\( Es \\) = \\infty) \\) تسمى:", "options": ["أ. عرض عديم المرونة", "ب. عرض أحادي المرونة", "ج. عرض لا نهائي المرونة", "د. عرض قليل المرونة"], "correctIndex": 2}, {"id": 100, "chapter": 2, "question": "منحنى العرض الواحد يعبر عن \"التغير في الكمية المعروضة\" وذلك استجابة لـ:", "options": ["أ. تغير أسعار المستلزمات فقط", "ب. تغير التكنولوجيا", "ج. تغير سعر السلعة نفسها مع افتراض ثبات المعطيات الأخرى", "د. تغير الضرائب"], "correctIndex": 2}, {"id": 101, "chapter": 2, "question": "\"التغير في العرض\" (حصول تحول في منحنى العرض إلى اليمين أو اليسار) يحدث بسبب:", "options": ["أ. تغير سعر السلعة نفسها فقط", "ب. تغير المعطيات أو العوامل الأخرى (مثل أسعار المستلزمات، التقنية، الضرائب)", "ج. ثبات جميع العوامل المحيطة", "د. تغير مرونة الطلب"], "correctIndex": 1}, {"id": 102, "chapter": 2, "question": "عند ارتفاع سعر سلعة ما، يميل المنتجون إلى تحويل المصادر وعناصر الإنتاج من:", "options": ["أ. السلع التي تحقق أرباحاً أكثر إلى السلع التي تحقق أرباحاً أقل", "ب. السلع التي تحقق أرباحاً أقل إلى السلع التي تحقق أرباحاً أكثر", "ج. الإنتاج المحلي إلى الاستيراد", "د. الاستثمار في التكنولوجيا إلى تقليل العمالة"], "correctIndex": 1}, {"id": 103, "chapter": 2, "question": "عند سحب مصادر وعناصر إنتاج إضافية لزيادة إنتاج سلعة ما، قد تكون كفاءتها أقل من كفاءتها في أعمالها السابقة، مما يؤدي إلى:", "options": ["أ. انخفاض التكلفة الكلية", "ب. ارتفاع متوسط تكلفة إنتاج وحدة السلعة", "ج. ثبات تكلفة الإنتاج", "د. زيادة أرباح المستهلكين"], "correctIndex": 1}, {"id": 104, "chapter": 2, "question": "للحصول على عرض السوق (منحنى عرض الصناعة) من خلال المشاريع الفردية، نقوم بـ:", "options": ["أ. جمع الكميات التي يعرضها كل مشروع عند أسعار مختلفة", "ب. جمع الأسعار التي يطلبها كل مشروع لكمية ثابتة", "ج. جمع الكميات التي يعرضها كل مشروع من السلعة مقابل نفس المستوى من الأسعار", "د. ضرب كميات المشروع الأول في كميات المشروع الثاني"], "correctIndex": 2}, {"id": 105, "chapter": 2, "question": "من الأمثلة التي ذكرت في الملف للصناعات التي تستخدم \"مستلزمات عامة\" تتيح سهولة التحويل وتزيد مرونة العرض:", "options": ["أ. صناعة إطارات السيارات", "ب. صناعة المعجنات والحلويات", "ج. صناعة الأدوية", "د. صناعة المعدات الثقيلة"], "correctIndex": 1}, {"id": 106, "chapter": 2, "question": "من الأمثلة التي ذكرت للصناعات التي تستخدم \"مستلزمات محددة\" تقلل من إمكانية مناقلتها وتؤثر سلباً على استجابة العرض:", "options": ["أ. صناعة المعجنات", "ب. صناعة الملابس", "ج. صناعة إطارات السيارات (استخدام المطاط)", "د. الأنشطة الزراعية"], "correctIndex": 2}, {"id": 107, "chapter": 2, "question": "تعتبر إمكانات النقل في العملية الإنتاجية:", "options": ["أ. جزءاً مكملاً وامتداداً لتقنية (فن) الإنتاج", "ب. متغيراً مستقلاً لا يؤثر على العرض", "ج. عاملاً من عوامل الطلب فقط", "د. بديلاً عن العمالة"], "correctIndex": 0}, {"id": 108, "chapter": 2, "question": "تبدو إمكانات التخزين وتأثيرها على مدى استجابة الكمية المعروضة للتغير في السعر أكثر وضوحاً في:", "options": ["أ. الأجل الطويل جداً", "ب. الأجل القصير", "ج. السلع غير القابلة للتلف نهائياً", "د. حالات انعدام الطلب"], "correctIndex": 1}, {"id": 109, "chapter": 2, "question": "في قانون مرونة العرض الرياضي، يرمز \\( (P_1) \\) و \\( (Q_1) \\) إلى:", "options": ["أ. السعر الحالي والكمية الحالية", "ب. السعر السابق (المبدئي) والكمية المعروضة سابقاً", "ج. مقدار التغير في السعر والتغير في الكمية", "د. مرونة الطلب المتقاطعة"], "correctIndex": 1}, {"id": 110, "chapter": 2, "question": "في منحنى العرض عالي المرونة \\( (\\( Es \\) > 1) \\)، تكون الزاوية المحصورة بين المحور السيني (الأفقي) ومنحنى العرض:", "options": ["أ. أكبر من الزاوية المحصورة مع المحور العمودي", "ب. متساوية مع الزاوية المحصورة مع المحور العمودي", "ج. أصغر من الزاوية المحصورة بين منحنى العرض والمحور العمودي", "د. قائمة (90 درجة)"], "correctIndex": 2}, {"id": 111, "chapter": 2, "question": "إذا ارتفع سعر السلعة بنسبة (20%)، وازدادت الكمية المعروضة بنسبة (10%)، فإن هذا العرض يوصف بأنه:", "options": ["أ. عالي المرونة", "ب. متكافئ المرونة", "ج. واطئ المرونة (غير مرن)", "د. لا نهائي المرونة"], "correctIndex": 2}, {"id": 112, "chapter": 2, "question": "هل يشترط بالضرورة أن يكون منحنى العرض دائماً خطاً مستقيماً؟", "options": ["أ. نعم، يشترط ذلك في جميع الحالات", "ب. لا يشترط بالضرورة أن يكون خطاً مستقيماً", "ج. نعم، فقط في حالة العرض غير المرن", "د. نعم، فقط في حالة العرض المتكافئ"], "correctIndex": 1}, {"id": 113, "chapter": 2, "question": "عندما تتحسن إمكانات العرض بسبب تغير المعطيات الأخرى (مثل انخفاض أسعار المستلزمات أو تحسن التقنية)، فإن منحنى العرض:", "options": ["أ. يتحرك صعوداً على نفس المنحنى", "ب. يتحول بأكمله إلى اليسار", "ج. يتحول بأكمله إلى اليمين", "د. يصبح عمودياً تماماً"], "correctIndex": 2}, {"id": 114, "chapter": 3, "question": "تفاعل الطلب والعرض هو الذي يحدد السعر الذي يتم به تبادل السلعة فعلاً، ويسمى هذا السعر بـ:", "options": ["أ. السعر الاحتكاري", "ب. سعر التوازن", "ج. السعر المستهدف", "د. السعر الافتراضي"], "correctIndex": 1}, {"id": 115, "chapter": 3, "question": "الكمية التي يتبادلها فعلاً البائعون والمشترون في السوق عند سعر التوازن تسمى:", "options": ["أ. الكمية المطلوبة الكلية", "ب. الكمية التوازنية", "ج. الكمية المعروضة الكلية", "د. الفائض الكلي"], "correctIndex": 1}, {"id": 116, "chapter": 3, "question": "ما يميز سعر التوازن عن باقي الأسعار في جدولي العرض والطلب هو أنه السعر الذي:", "options": ["أ. يحقق أقصى ربح للبائع", "ب. يستقر عنده التبادل في السوق فعلاً وتتساوى عنده الكمية المطلوبة والمعروضة", "ج. يحقق أقل تكلفة للمستهلك", "د. يكون دائماً أعلى من الأسعار الأخرى"], "correctIndex": 1}, {"id": 117, "chapter": 3, "question": "إذا ارتفع سعر وحدة السلعة إلى أكثر من مستوى السعر التوازني، فإن ذلك سيؤدي إلى:", "options": ["أ. زيادة الكميات المطلوبة وتراجع الكميات المعروضة", "ب. تراجع الكميات المطلوبة وزيادة الكميات المعروضة (فائض في العرض)", "ج. ثبات الكميات المطلوبة والمعروضة", "د. شحة في العرض"], "correctIndex": 1}, {"id": 118, "chapter": 3, "question": "في حالة وجود فائض في العرض (السعر أعلى من التوازن)، فإن رد فعل السوق سيكون:", "options": ["أ. رفع السعر أكثر", "ب. تنافس المشترين لرفع السعر", "ج. تنافس البائعين وتقديم تخفيضات في السعر فينخفض تدريجياً", "د. توقف الإنتاج تماماً"], "correctIndex": 2}, {"id": 119, "chapter": 3, "question": "إذا انخفض سعر وحدة السلعة عن المستوى التوازني، فإن ذلك سيؤدي إلى:", "options": ["أ. تراجع الكميات المطلوبة", "ب. زيادة الكميات المعروضة", "ج. زيادة الكميات المطلوبة وتراجع الكميات المعروضة (شحة في العرض / فائض في الطلب)", "د. توازن السوق فوراً"], "correctIndex": 2}, {"id": 120, "chapter": 3, "question": "في ظل السعر التوازني (EP)، يصبح فائض الطلب وفائض العرض مساوياً لـ:", "options": ["أ. اللانهاية", "ب. الصفر", "ج. مقدار الكمية التوازنية", "د. نصف الكمية المعروضة"], "correctIndex": 1}, {"id": 121, "chapter": 3, "question": "في التمثيل الرياضي لدالة الطلب \\( Qd = a - bP \\)، ودالة العرض \\( Qs = -c + dP \\)، يتحقق شرط التوازن عندما:", "options": ["أ. \\( Qd > Qs \\)", "ب. \\( Qd < Qs \\)", "ج. \\( Qd = Qs \\) (الكمية المطلوبة تساوي الكمية المعروضة)", "د. P = 0"], "correctIndex": 2}, {"id": 122, "chapter": 3, "question": "بناءً على الاشتقاق الرياضي، المعادلة التي تحدد السعر التوازني (P) هي:", "options": ["أ. \\( P = \\frac{a - c}{d - b} \\)", "ب. \\( P = \\frac{a + c}{d + b} \\)", "ج. \\( P = \\frac{ad - bc}{d + b} \\)", "د. P = a + b + c + d"], "correctIndex": 1}, {"id": 123, "chapter": 3, "question": "بناءً على الاشتقاق الرياضي، المعادلة التي تحدد الكمية التوازنية (Q) هي:", "options": ["أ. \\( Q = \\frac{a + c}{d + b} \\)", "ب. \\( Q = \\frac{ad - bc}{d + b} \\)", "ج. \\( Q = \\frac{a - c}{d - b} \\)", "د. Q = (ab + cd) / 2"], "correctIndex": 1}, {"id": 124, "chapter": 3, "question": "يقوم جهاز الأسعار، عند تحديده للسعر التوازني، بوظيفة أساسية تتمثل في:", "options": ["أ. إشباع احتياجات جميع الأفراد دون استثناء", "ب. تطهير السوق من السلع المعروضة", "ج. تقديم الإعانات للفقراء", "د. تحديد الضرائب"], "correctIndex": 1}, {"id": 125, "chapter": 3, "question": "المأخذ السلبي (العيب الأساسي) على عمل جهاز الأسعار في السوق هو أنه:", "options": ["أ. يوزع السلع طبقاً للاحتياجات النسبية للأفراد", "ب. لا يحقق التوازن أبداً", "ج. يوزع السلع طبقاً للقدرة على الدفع (الدخول النسبية) وليس طبقاً للاحتياجات", "د. يحدد أسعاراً منخفضة جداً دائماً"], "correctIndex": 2}, {"id": 126, "chapter": 3, "question": "يظل سعر السلعة التوازني والكمية التوازنية ثابتين طالما:", "options": ["أ. تغير الدخل", "ب. تغير ذوق المستهلك", "ج. ظل جدول العرض والطلب على حالهما دون تغير (استقرار ظروف العرض والطلب)", "د. زادت الضرائب"], "correctIndex": 2}, {"id": 127, "chapter": 3, "question": "إذا ازدادت درجة مرونة منحنى الطلب (تحرك إلى اليمين) مع ثبات ظروف العرض، فإن السعر التوازني سوف:", "options": ["أ. ينخفض", "ب. يرتفع", "ج. يظل ثابتاً", "د. ينخفض إلى الصفر"], "correctIndex": 1}, {"id": 128, "chapter": 3, "question": "إذا انخفضت درجة مرونة منحنى الطلب (انحسر إلى اليسار) مع ثبات ظروف العرض، فإن السعر التوازني سوف:", "options": ["أ. يرتفع", "ب. ينخفض", "ج. يظل ثابتاً", "د. يتضاعف"], "correctIndex": 1}, {"id": 129, "chapter": 3, "question": "إذا ازدادت درجة مرونة منحنى العرض (زحف إلى اليمين) مع ثبات ظروف الطلب، فإن السعر التوازني سوف:", "options": ["أ. يرتفع", "ب. ينخفض", "ج. يظل ثابتاً", "د. يرتفع بصورة متذبذبة"], "correctIndex": 1}, {"id": 130, "chapter": 3, "question": "إذا انخفضت درجة مرونة منحنى العرض (انحسر إلى اليسار) مع ثبات ظروف الطلب، فإن السعر التوازني سوف:", "options": ["أ. ينخفض", "ب. يظل ثابتاً", "ج. يرتفع", "د. ينخفض للصفر"], "correctIndex": 2}, {"id": 131, "chapter": 3, "question": "ما الذي يعزز ارتفاع سعر السلعة التوازني إلى مستوى أبعد (أعلى نقطة)؟", "options": ["أ. انخفاض مرونة الطلب وزيادة مرونة العرض في نفس الوقت", "ب. زيادة مرونة الطلب وزيادة مرونة العرض في نفس الوقت", "ج. زيادة مرونة منحنى الطلب وانخفاض مرونة منحنى العرض في نفس الوقت", "د. ثبات مرونة الطلب والعرض"], "correctIndex": 2}, {"id": 132, "chapter": 3, "question": "ما الذي يعزز انخفاض سعر السلعة التوازني إلى مستوى أقل (أدنى نقطة)؟", "options": ["أ. زيادة مرونة الطلب وانخفاض مرونة العرض", "ب. انخفاض درجة مرونة منحنى الطلب مع زيادة درجة مرونة منحنى العرض في نفس الوقت", "ج. انخفاض مرونة الطلب والعرض معاً", "د. ثبات مرونة الطلب والعرض"], "correctIndex": 1}, {"id": 133, "chapter": 3, "question": "إذا تغيرت مرونة كلا المنحنيين بنفس الاتجاه ولكن بدرجتين متفاوتتين، فإن المسألة في تحديد التوازن الجديد تتوقف على:", "options": ["أ. مرونة الطلب فقط", "ب. مرونة العرض فقط", "ج. صافي التحرك النسبي في أحد طرفي التبادل (العرض أو الطلب)", "د. التدخل الحكومي"], "correctIndex": 2}, {"id": 134, "chapter": 3, "question": "إذا ازدادت درجة مرونة منحنى الطلب بنسبة (12%)، وازدادت مرونة منحنى العرض بنسبة (7%)، فإن النتيجة تبدو وكأن صافي الزيادة حصل في:", "options": ["أ. منحنى العرض بنسبة 5%", "ب. منحنى الطلب بنسبة 5%", "ج. منحنى الطلب بنسبة 19%", "د. منحنى العرض بنسبة 19%"], "correctIndex": 1}, {"id": 135, "chapter": 3, "question": "في الحالة السابقة (زيادة الطلب 12% وزيادة العرض 7%)، سيؤدي هذا التحرك الصافي لزيادة الطلب إلى:", "options": ["أ. انخفاض السعر التوازني", "ب. ثبات السعر التوازني", "ج. ارتفاع سعر السلعة التوازني", "د. انخفاض الكمية التوازنية للصفر"], "correctIndex": 2}, {"id": 136, "chapter": 3, "question": "إذا انخفضت مرونة منحنى الطلب بنسبة (8%)، وانخفضت مرونة منحنى العرض بنسبة (11%)، فستبدو النتيجة وكأن:", "options": ["أ. منحنى الطلب انخفض بنسبة 3%", "ب. منحنى الطلب انخفض بنسبة 19%", "ج. منحنى العرض انخفضت مرونته بنسبة 3%", "د. منحنى العرض انخفض بنسبة 19%"], "correctIndex": 2}, {"id": 137, "chapter": 3, "question": "في الحالة السابقة (انخفاض الطلب 8% وانخفاض العرض 11%)، سيؤدي هذا التحرك الصافي لانخفاض العرض إلى:", "options": ["أ. انخفاض سعر السلعة التوازني", "ب. ارتفاع سعر السلعة التوازني", "ج. بقاء السعر التوازني ثابتاً", "د. تذبذب السعر التوازني"], "correctIndex": 1}, {"id": 138, "chapter": 3, "question": "إذا ازدادت مرونة منحنى الطلب بنسبة (6%)، وازدادت مرونة منحنى العرض بنسبة (10%)، فستبدو النتيجة وكأن:", "options": ["أ. منحنى العرض لوحده زادت مرونته بنسبة 4%", "ب. منحنى الطلب لوحده زادت مرونته بنسبة 4%", "ج. منحنى العرض زاد بنسبة 16%", "د. منحنى الطلب زاد بنسبة 16%"], "correctIndex": 0}, {"id": 139, "chapter": 3, "question": "في الحالة السابقة (زيادة الطلب 6% وزيادة العرض 10%)، سيؤدي هذا التحرك الصافي لزيادة العرض إلى:", "options": ["أ. ارتفاع سعر السلعة التوازني", "ب. انخفاض سعر السلعة التوازني", "ج. ثبات السعر التوازني", "د. انخفاض الكمية التوازنية"], "correctIndex": 1}, {"id": 140, "chapter": 3, "question": "منحنى الطلب للسلعة الاعتيادية ينطوي على علاقة:", "options": ["أ. طردية بين السعر والكمية", "ب. عكسية بين السعر والكمية المطلوبة", "ج. صفرية لا تتأثر بالسعر", "د. متوازية مع العرض"], "correctIndex": 1}, {"id": 141, "chapter": 3, "question": "منحنى العرض للسلعة الاعتيادية ينطوي على علاقة:", "options": ["أ. طردية بين السعر والكمية المعروضة", "ب. عكسية بين السعر والكمية", "ج. أفقية تماماً", "د. لا علاقة بينهما"], "correctIndex": 0}, {"id": 142, "chapter": 3, "question": "هل يوضح منحنى الطلب وحده أو منحنى العرض وحده السعر الذي سيتم به تبادل السلعة فعلاً؟", "options": ["أ. نعم، منحنى الطلب يكفي", "ب. نعم، منحنى العرض يكفي", "ج. لا، أي منهما لا يوضح ذلك بشكل حاسم بمفرده", "د. نعم، إذا كانت المرونة لا نهائية"], "correctIndex": 2}, {"id": 143, "chapter": 3, "question": "بالرجوع لجدول (1)، عندما يكون سعر وحدة السلعة مرتفعاً (600 دينار)، فإن حالة السوق تكون:", "options": ["أ. توازن تام", "ب. الكمية المطلوبة (19000) أكبر من المعروضة", "ج. الكمية المعروضة (19000) أكبر من المطلوبة (5000) مما يخلق فائض عرض", "د. شحة في العرض"], "correctIndex": 2}, {"id": 144, "chapter": 3, "question": "بالرجوع لجدول (1)، عندما ينخفض سعر وحدة السلعة إلى (100 دينار)، فإن حالة السوق تكون:", "options": ["أ. فائض في العرض", "ب. الكمية المطلوبة (19000) والكمية المعروضة (1500) مما يخلق شحة عرض", "ج. توازن في السوق", "د. عزوف المستهلكين عن الشراء"], "correctIndex": 1}, {"id": 145, "chapter": 3, "question": "في الرسم البياني لتوازن السوق، إذا ارتفع السعر إلى المستوى (H)، فإن المسافة (BK) على المحور الأفقي تمثل:", "options": ["أ. نقطة التوازن", "ب. فائضاً في الطلب", "ج. فائضاً في العرض", "د. السعر التوازني"], "correctIndex": 2}, {"id": 146, "chapter": 3, "question": "في الرسم البياني لتوازن السوق، إذا انخفض السعر إلى المستوى (C)، فإن المسافة (LM) تمثل:", "options": ["أ. شحة في العرض (فائض في الطلب)", "ب. فائضاً في العرض", "ج. توازناً مستقراً", "د. مرونة لا نهائية"], "correctIndex": 0}, {"id": 147, "chapter": 3, "question": "حالة التوازن المذكورة في السوق (تساوي الكمية المطلوبة والمعروضة) تستمر في الأمد القصير طالما أن:", "options": ["أ. الأسعار العالمية متذبذبة", "ب. العوامل المؤثرة في منحنى الطلب ومنحنى العرض مستقرة", "ج. الضرائب في ازدياد", "د. أذواق المستهلكين تتغير يومياً"], "correctIndex": 1}, {"id": 148, "chapter": 3, "question": "في المعادلتين الرياضيتين: (\\( Qd = a - bP \\)) و (\\( Qs = -c + dP \\))، تسمى القيم (a, b, c, d) بـ:", "options": ["أ. المتغيرات التابعة", "ب. المتغيرات المستقلة", "ج. معلمات دالتي الطلب والعرض", "د. الأسعار الافتراضية"], "correctIndex": 2}, {"id": 149, "chapter": 3, "question": "في الدالتين السابقتين، الرمزان (b) و (d) يمثلان:", "options": ["أ. نقطتا التقاطع مع محور الكمية", "ب. ميل كل من منحنى الطلب ومنحنى العرض على التوالي", "ج. السعر التوازني والكمية التوازنية", "د. الإعانات والضرائب"], "correctIndex": 1}, {"id": 150, "chapter": 3, "question": "من عيوب جهاز الأسعار أنه لا يلبي أية احتياجات بشرية إذا كانت هذه الاحتياجات:", "options": ["أ. غير ضرورية", "ب. لا تستند على القدرة على الدفع", "ج. كمالية", "د. متوفرة بكثرة"], "correctIndex": 1}, {"id": 151, "chapter": 3, "question": "تلجأ الدولة أحياناً للتدخل والرقابة على الأسعار لأن جهاز الأسعار يقوم بتوزيع السلع طبقاً لـ:", "options": ["أ. الاحتياجات النسبية للأفراد", "ب. العدالة الاجتماعية التامة", "ج. الدخول النسبية للأفراد (القدرة على الدفع)", "د. حجم الأسرة فقط"], "correctIndex": 2}, {"id": 152, "chapter": 3, "question": "العوامل التي تؤدي إلى تغير ظروف الطلب (وحركة منحنى الطلب) تشمل:", "options": ["أ. تقنية الإنتاج وأسعار المستلزمات", "ب. دخل الفرد، ذوقه، أسعار السلع البديلة والمكملة، وحجم السكان", "ج. الإعانات والضرائب", "د. تكاليف النقل"], "correctIndex": 1}, {"id": 153, "chapter": 3, "question": "العوامل التي تؤدي إلى تغير ظروف العرض (وحركة منحنى العرض) تشمل:", "options": ["أ. نمط توزيع الدخل القومي وحجم السكان", "ب. أذواق المستهلكين", "ج. تقنية الإنتاج، أسعار المستلزمات، الضرائب والإعانات", "د. أسعار السلع المكملة فقط"], "correctIndex": 2}, {"id": 154, "chapter": 3, "question": "وفقاً للنص، إذا ازدادت درجة مرونة منحنى الطلب (مع ثبات ظروف العرض)، فإن منحنى الطلب يزحف إلى:", "options": ["أ. اليمين", "ب. اليسار (D1) ويرتفع السعر التوازني", "ج. الأسفل", "د. ينطبق على منحنى العرض"], "correctIndex": 1}, {"id": 155, "chapter": 3, "question": "وفقاً للنص، إذا انخفضت مرونة منحنى الطلب (مع ثبات ظروف العرض)، فإن منحنى الطلب ينحسر إلى:", "options": ["أ. اليمين (D2) وينخفض سعر السلعة التوازني", "ب. اليسار", "ج. الأعلى", "د. خط عمودي"], "correctIndex": 0}, {"id": 156, "chapter": 3, "question": "إذا ازدادت درجة مرونة منحنى العرض (مع ثبات ظروف الطلب)، فإنه يزحف إلى:", "options": ["أ. اليسار ويرتفع السعر التوازني", "ب. اليمين، وينخفض سعر السلعة التوازني (تزحف نقطة التقاطع للأسفل)", "ج. الأعلى", "د. خط أفقي"], "correctIndex": 1}, {"id": 157, "chapter": 3, "question": "إذا انخفضت درجة مرونة منحنى العرض (مع ثبات ظروف الطلب)، فإنه ينحسر إلى:", "options": ["أ. اليمين", "ب. الأسفل", "ج. اليسار، ويرتفع سعر السلعة التوازني", "د. نقطة الأصل"], "correctIndex": 2}, {"id": 158, "chapter": 3, "question": "من الناحية الهندسية، يرتفع سعر السلعة التوازني متى ما:", "options": ["أ. تحرك موقع نقطة التقاطع بين المنحنيين إلى الأعلى", "ب. تحرك موقع نقطة التقاطع إلى الأسفل", "ج. أصبح منحنى العرض أفقياً", "د. تساوى الميل مع نقطة الأصل"], "correctIndex": 0}, {"id": 159, "chapter": 3, "question": "من الناحية الهندسية، ينخفض سعر السلعة التوازني متى ما:", "options": ["أ. تحرك موقع نقطة التقاطع بين المنحنيين إلى الأعلى", "ب. تحرك موقع نقطة التقاطع بين المنحنيين إلى الأسفل", "ج. أصبح منحنى الطلب عمودياً", "د. زادت الضرائب بشكل كبير"], "correctIndex": 1}];
+        const CHAPTERS = [{"id": 1, "title": "الفصل الأول (نظرية الطلب)"}, {"id": 2, "title": "الفصل الثاني (نظرية العرض)"}, {"id": 3, "title": "الفصل الثالث (توازن السوق)"}];
+        
+        // Detailed Explanations Map
+        const EXPLANATIONS = {
+            // Chapter 1 Explanations
+            1: "لأن الطلب هو التعبير العملي عن الحاجة الماسة بالسوق، الرغبة وحدها ما تكفي، لازم اكو فلوس وتوجه للشراء.",
+            2: "الرغبة بدون فلوس مجرد أمنية، حتى يصير طلب حقيقي لازم تقترن بالقدرة الشرائية (فلوسك بجيبك).",
+            3: "الشرط الذاتي ينبع من داخل الشخص وهو (الرغبة)، أما الموضوعي فهو القدرة الشرائية اللي تفرضها ظروف السوق.",
+            4: "الشرط الموضوعي هو الشي الملموس والخارجي اللي يخلي طلبك يشتغل بالسوق، وهو القدرة على الدفع.",
+            5: "المتغيرات النوعية مثل (الأذواق) ما تنقاس بالمسطرة أو الفلوس، بس نكدر نرتبها حسب الأهمية وتلعب دور جبير بالطلب.",
+            6: "من يغلى الشي يقل السحب عليه، ومن يرخص يزيد.. هاي هي العلاقة العكسية لقانون الطلب.",
+            7: "قانون تناقص المنفعة الحدية يفسر ليش اللفة الثانية مو بطيبة اللفة الأولى! كل ما تستهلك أكثر تقل رغبتك بالوحدة الإضافية.",
+            8: "من يزيد راتبك (دخلك) طبيعي راح تشتري أكثر من السلع الزينة، ولهذا العلاقة طردية.",
+            9: "من يصير عندك فلوس وتتزنكن، راح تبطل تشتري ملابس مستعملة أو سلع تعبانة، ولهذا تتسمى سلع رديئة (دنيا).",
+            10: "لحم الغنم ولحم البقر بدائل لبعض.. إذا غلى الغنم الناس تروح للبقر.. فهن سلع بديلة تعطي إشباع متقارب.",
+            11: "إذا غلى سعر الشاي (السلعة البديلة)، الناس راح تزيد طلبها على القهوة (السلعة الأصلية).. علاقة طردية تمشي سوة.",
+            12: "السيارة تمشي بدون بانزين؟ البانزين والسيارة يكملون بعض حتى يتحقق الإشباع الكامل.",
+            13: "إذا غلى الشكر (المكمل)، راح تقلل من شرب الشاي (الأصلي).. لأن كلفة الكلاص كلها صارت غالية.",
+            14: "الإعلان والترويج يغسل دماغ المستهلك ويغير أذواقه وتفضيلاته، ويخليه يشتهي شغلات ما جان يفكر بيها.",
+            15: "عدد السكان وتوزيع الدخل يتغيرون بصورة بطيئة ومستقلة، لذلك الاقتصادي يعتبرهم متغيرات خارجية (Exogenous) بالدراسة.",
+            16: "دالة الطلب الرياضية تعتمد بس على المتغيرات اللي تنحسب بالأرقام (كمية) مثل السعر والدخل وأسعار السلع الاخرى.",
+            17: "المرونة السعرية تقيس شكد الناس تتأثر وتغير كميات شرائها من يتغير سعر السلعة نفسها.",
+            18: "اذا السعر تغير شوية، بس الناس غيرت شرائها هواية، يعني الناس تتحسس حيل للسعر.. فهذا طلب عالي المرونة.",
+            19: "السلع الكمالية مو ضرورية لحياتك، فإذا صعد سعرها راح تقلل شرائها بقوة، ولذلك طلبها مرن (أكبر من 1).",
+            20: "طبق قانون المرونة: (التغير النسبي بالكمية / التغير النسبي بالسعر). الكمية نزلت من 1000 الى 600، والسعر صعد من 100 الى 110. رياضياً تطلع -4.",
+            21: "اذا السعر طفر بس الناس ما گدرت تقلل شراها هواية (تأثرت قليل)، يتسمى طلب قليل المرونة.",
+            22: "بالطلب قليل المرونة تكون النتيجة دائماً اقل من واحد صحيح (ولأن العلاقة عكسية تكون الاشارة سالبة فناخذ القيمة المطلقة).",
+            23: "السلع الضرورية مثل الخبز، لو شكد ما يصعد سعره لازم تشتري، فتكون استجابة الناس قليلة (قليل المرونة).",
+            24: "القيمة -0.1 (بدون اشارة 0.1) وهي اصغر من 1، يعني الطلب قليل المرونة.",
+            25: "اذا السعر زاد 10% والكمية المطلوبة نزلت 10% بالظبط، يعني متكافئين، فهذا الطلب أحادي المرونة.",
+            26: "بما انه التغير متساوي بالبسط والمقام، ناتج القسمة دائماً يطلع واحد.",
+            27: "مهما تغير السعر انت تشتري نفس الكمية بالظبط، يعني استجابتك صفر! فهذا عديم المرونة تماماً.",
+            28: "الدواء (علاج السكر مثلاً) لو يصير بمليون لازم تشتري نفس الجرعة.. فطلبك عليه عديم المرونة.",
+            29: "لان الكمية ثابتة والسعر يصعد وينزل، الرسم راح يكون خط واگف طولياً (عمودي).",
+            30: "أي تغيير بسيط بالسعر يخلي الناس لو تشتري كلشي بالسوق لو تبطل تشتري نهائياً.. هذا لا نهائي المرونة.",
+            31: "لأن السعر ثابت والكميات بس هي اللي تتغير بشكل مفتوح، الخط يكون نايم (أفقي).",
+            32: "بالرسم الهندسي، كل ما صار الخط واگف (أشد انحدار)، المرونة تقل. وكلما نام أكثر زادت المرونة.",
+            33: "من اسمها 'تقاطعية' يعني تقاطع تأثير سعر سلعة على كمية سلعة ثانية تختلف عنها (مثل الشاي والقهوة).",
+            34: "اذا غلى الدجاج (y) الناس راح تزيد طلبها على اللحم (x).. الاشارة تطلع موجبة، وهن سلع بديلة.",
+            35: "اذا غلى البانزين (y) راح يقل الطلب على السيارات (x).. الاشارة سالبة، وهن مكملات لبعض.",
+            36: "تغير سعر الطماطة ماله علاقة بطلبك للسيارات، الاستجابة صفر.. السلعتين ما يخصن بعض (مستقلات).",
+            37: "المرونة التعزيزية تقيس شكد تأثرت الكمية المطلوبة بسبب الترويج والإعلانات (الذوق).",
+            38: "لأن الذوق شعور ما ينقاس بالكيلو، نستخدم فلوس الدعاية والترويج كمؤشر رقمي يعكس تغير الذوق.",
+            39: "اذا صرفنا عالترويج بس الناس قللت الشراء (اشارة سالبة)، يعني الناس نظرتهم سلبية وتراجعت رغبتهم للسلعة.",
+            40: "المرونة الدخلية تبينلك شكد راح تزيد صرفك وشراك للسلع من يزيد راتبك.",
+            41: "اذا زاد راتبك وقمت تشتري اقل من السلعة (علاقة سالبة)، معناها هاي السلعة رديئة جنت مجبور عليها قبل.",
+            42: "اذا زاد راتبك وزاد شرائك للسلعة، فهالسلعة زينة واعتيادية ومو رديئة.",
+            43: "منحنى الطلب العادي دائماً ينزل من فوك ليجوة (أعلى اليسار الى أسفل اليمين) بسبب العلاقة العكسية.",
+            44: "جيفين لاحظ انه الفقراء كلش، من يرخص الخبز، بدل ما يشترون خبز أكثر، يجمعون الباقي ويشترون لحم! فهذا عكس قانون الطلب.",
+            45: "مثل ما كال جيفين: المستهلك الفقير يستغل رخص السلعة الدنيا حتى يفر فلوس ويشتري سلع أفضل.",
+            46: "لأن العلاقة صارت طردية (مقلوبة)، المنحنى راح يصعد من الجوة ليفوك، عكس المنحنى العادي.",
+            47: "السلع الدنيا علاقتها ويه الدخل عكسية: يزيد راتبك، تبطل تشتري ملابس بالة.",
+            48: "الأغنياء يحبون يفيكّون، فمن تغلى السلعة يشتروها أكثر حتى يتباهون بيها (Veblen Goods).",
+            49: "الجواهر، اللوحات الفنية، سيارات الفيراري.. سلع يشتروها الأغنياء للمباهاة.",
+            50: "بكل بساطة، كل ما تغلى هاي السلع تزيد قيمتها المعنوية عند الأغنياء فيزيد طلبهم عليها.",
+            51: "حتى بالمباهاة، كل ما زادت فلوسهم (دخلهم) زاد شراءهم لهاي السلع، فالعلاقة تبقى طردية ويه الدخل.",
+            52: "اذا سمعت سعر الذهب راح يصعد بعد يومين بشكل كبير، اكيد راح تركض تشتري اليوم أكثر وتزيد الكمية.",
+            53: "اذا السلعة تخرب بسرعة ما يفيدك تخزنها حتى لو سمعت سعرها راح يصعد. بس اذا قابلة للخزن راح يشتغل تأثير التوقعات صح.",
+            54: "طلب السوق هو المجموع الكلي لكل طلبات الافراد اللي بالسوق على أسعار مختلفة.",
+            55: "حتى نرسم طلب السوق، نحسب الكميات اللي يطلبها كل فرد بأسعار مختلفة ونجمعها كلها (التجميع الأفقي).",
+            56: "الإيراد الكلي (الفلوس اللي تدخل للصندوق) = عدد القطع المباعة مضروب في سعر القطعة.",
+            57: "الفلوس اللي تطلع من جيب المستهلكين (إنفاق كلي) هي نفسها الفلوس اللي تدخل بصندوق البائع (إيراد كلي).",
+            58: "اذا الطلب مرن (كماليات)، من تعلي السعر الناس راح تعوفك بشكل كبير، فتخسر فلوس وينزل ايرادك الكلي.",
+            59: "اذا الطلب قليل المرونة (دواء)، من تنزل السعر الناس مراح تشتري اكثر بهواية، فبالنهاية ايرادك راح ينقص.",
+            60: "بالطلب قليل المرونة: ارفع السعر يزيد ايرادك، نزل السعر ينزل ايرادك.. يمشون سوة.",
+            61: "بالطلب المتكافئ، الخسارة اللي تصير بالسعر تعوضها الزيادة بالكمية بالظبط، فالايراد الكلي يبقى ثابت ما يتغير.",
+            62: "لأن النسبة متساوية 100% بين نزول السعر وصعود الكمية، المعادلة تتوازن ويبقى الايراد نفسه.",
+            63: "بما انه الطلب عديم المرونة (الكمية ثابتة ماتتغير)، فإذا رفعت السعر، الايراد الكلي اكيد راح يزيد.",
+            64: "بالطلب لا نهائي المرونة، اي رفعة بسيطة للسعر راح تطرد كل الزبائن وتخلي الكمية صفر، فالايراد يصير صفر.",
+            65: "الإيراد الحدي هو الفلوس الإضافية اللي تدخل للصندوق من بيع وحدة واحدة إضافية.",
+            66: "بالمنافسة التامة السعر ثابت ما تكدر تغيره، فكل قطعة إضافية تبيعها راح تنطيك نفس السعر بالظبط.",
+            67: "من تضطر تسوي خصم (تنزل السعر) حتى تبيع اكثر، راح تبيع القطعة الجديدة بسعر أقل، فالسعر القديم يكون اكبر من الايراد الجديد.",
+            68: "هاي هي الصيغة الرياضية الاستنتاجية اللي تربط بين الايراد الحدي والسعر ومرونة الطلب.",
+            69: "بما انه الطلب مرن، تخفيض السعر يزيد المبيعات هواي، فالفلوس الإضافية اللي تجي (الايراد الحدي) تبقى موجبة.",
+            
+            // Chapter 2 Explanations
+            70: "العرض هو الكميات اللي البائعين يقبلون يبيعوها بالأسعار المختلفة، مو بس سعر واحد ثابت.",
+            71: "العلاقة طردية لأن كل ما السعر يزيد، يطمع البائع بالربح فيعرض كميات أكبر للبيع.",
+            72: "العرض هو الجدول او المنحنى بالكامل، أما الكمية المعروضة فهي رقم واحد لنقطة معينة مرتبطة بسعر واحد.",
+            73: "سبب العلاقة الطردية هو ان التاجر غايته الربح.. كل ما يغلى السعر تزيد فرصة تحقيقه لأرباح اكبر.",
+            74: "المنتج يعوف السلع الرخيصة ويروح يحول مكائنه وعماله حتى ينتج السلعة اللي صعد سعرها لأن بيها ربح أكثر.",
+            75: "حتى ندرس تأثير السعر بشكل صحيح ونرسم جدول، نفرض انه كلشي ثابت ونتحكم بس بالسعر (باقي الأمور على حالها).",
+            76: "ما يكفي تكول أعرض 1000 قطعة.. لازم تحدد الفترة (مثلاً 1000 قطعة بالشهر)، فالزمن كلش ضروري.",
+            77: "السعر هو المتغير المستقل اللي يتحكم، والكمية المعروضة هي المتغير التابع اللي يتأثر بالسعر.",
+            78: "من تنتج اكثر راح تسحب عمال ومكائن اضافية، وتكلفتهم اعلى، فلازم ترفع السعر حتى تغطي هالتكلفة المتزايدة.",
+            79: "الكفاءة تقل من تسحب عناصر انتاج من غير مجالات، وهالشي يخلي متوسط التكلفة يرتفع بشكل مضطرد.",
+            80: "الصناعة تشمل كل المعامل والشركات اللي تنتج نفس السلعة.. فالعرض مالها هو مجموع كل ذولي المنتجين.",
+            81: "بما انه يعتمد على جمع منحنيات المشاريع، فهو همين يصعد من جوة ليفوك (علاقة طردية) حاله حال عرض المشروع الواحد.",
+            82: "من تغلى المواد الاولية (المستلزمات) راح تقل أرباحك وتزيد التكلفة، فهالشي يجبرك تقلل الكمية اللي تعرضها.",
+            83: "اذا المستلزمات ترهم لغير شغلات (مثل الطحين للكيك والخبز)، تكدر بسهولة تحولها، وهالشي ينطي مرونة وتأثير إيجابي لسرعة استجابة العرض.",
+            84: "التطور التكنولوجي (مكائن احدث) يقلل التكلفة ويزيد الانتاج، فيخلي البائع يكدر يستجيب ويعرض اكثر.",
+            85: "بالفترة القصيرة ما تكدر تبني مصنع جديد بسرعة.. فزيادة العرض تواجه صعوبة لحد ما توسع المنشآت الثابتة.",
+            86: "اذا صعود السعر فترة وتعدي (طفرة مؤقتة)، مو من المنطقي تصرف ملايين تبني مصنع وتجيب مكائن لأن راح تخسر بعدين.",
+            87: "اذا السعر نزل، وبضاعتك ما تخرب (تكدر تخزنها)، راح تضمها بالمخازن وتقلل المعروض بالسوق لحد ما يصعد السعر.",
+            88: "من الدولة تنطيك فلوس (إعانة)، راح تقل تكاليفك وتربح اكثر، فتتشجع وتزيد العرض بالسوق.",
+            89: "الضريبة عكس الإعانة.. تزيد تكاليفك وتقلل ربحك وتجبرك تنزل انتاجك وتقلل استجابتك للعرض.",
+            90: "المرونة دائماً هي نسبة التغير بالكمية مقسومة على نسبة التغير بالسعر (استجابة الكمية لتغير السعر).",
+            91: "بما انه استجابة الكمية اكبر بهواية من تغير السعر (النسبة اكبر من 1)، فهذا العرض يتسمى مرن او عالي المرونة.",
+            92: "كل ما زادت المرونة العرضية، المنحنى ينزل وينام باتجاه المحور الأفقي (الكميات).",
+            93: "تغير متساوي 10% مقابل 10%، يعني التكافؤ، ويتسمى أحادي المرونة.",
+            94: "المنحنى الأحادي المرونة ينطلق من نقطة الأصل ويقسم الزاوية 90 بالنص (45 درجة لكل جهة).",
+            95: "اذا الاستجابة اقل من التغير بالسعر، النتيجة تطلع اقل من 1 ويتسمى عرض واطئ المرونة (غير مرن).",
+            96: "كل ما قلت المرونة، الخط راح يصير واكف (ينحدر بشدة) والزاوية تكبر باتجاه المحور الأفقي.",
+            97: "اذا مهما تغير السعر انت ما تكدر تزيد ولا تنقص حبة وحدة، استجابتك صفر! فهذا عرض عديم المرونة تماماً.",
+            98: "الاراضي الزراعية مساحتها ثابتة ما تزيد بيوم وليلة حتى لو صار المتر بمليار! فعرضها عديم المرونة بالأمد القصير.",
+            99: "المعامل جاهزة تذبلك انتاج مفتوح بسعر السوق وما تغيره، استجابتها مفتوحة (لانهائية).",
+            100: "منحنى العرض الواحد مرسوم على اساس انه (كل العوامل ثابته عدا السعر)، فالحركة عليه تعبر عن استجابة للسعر فقط.",
+            101: "من تتغير التكنولوجيا او الضريبة، المنحنى كله راح يشيل غراضه ويتحرك لليمين (زيادة) او لليسار (نقصان) وهذا يتسمى التغير في العرض.",
+            102: "المبدأ الاقتصادي بديهي: المستثمر يعوف الشغلة اللي ربحها قليل ويروح للشغلة اللي ربحها اكثر.",
+            103: "لأن العمال والمكائن الجديدة مو نفس خبرة القديمين بمجالهم، فراح تكلفك اكثر وانتاجهم ابطئ، فترتفع التكلفة.",
+            104: "عرض الصناعة هو التجميع الافقي، يعني تثبت السعر وتجمع الكميات اللي ينتجها كل معمل بهالسعر.",
+            105: "الطحين والشكر مستلزمات عامة ترهم لكل المعجنات، فسهل تحولها من كيك الى بقلاوة، مما يزيد مرونة الاستجابة.",
+            106: "المطاط مال اطارات ما تكدر تسوي بيه قمصان! فمناقلته صعبة ويقلل من مرونة العرض.",
+            107: "النقل هو المكمل للإنتاج، اذا انتجت وما كدرت توصل البضاعة للسوق.. فكأنك ما انتجت.",
+            108: "بالأمد القصير المعامل ما تكدر تزيد الانتاج بسرعة، فإمكانية الخزن تلعب دور جبير بزيادة او تقليل العرض بالسوق حالاً.",
+            109: "بالقوانين، P1 و Q1 يمثلون دايماً نقطة البداية (السابق او المبدئي) قبل لا يصير اي تغيير.",
+            110: "بالعرض المرن، المنحنى يكون نايم، فزاويته ويه الأرض (المحور السيني) تصير اصغر من زاويته ويه الحايط (المحور الصادي).",
+            111: "10% كمية تقسيم 20% سعر = 0.5 (اقل من 1)، اذن العرض قليل المرونة (واطئ).",
+            112: "الأشكال المستقيمة للتبسيط فقط، بالواقع المنحنيات ممكن تاخذ اشكال مقوسة حسب المعطيات.",
+            113: "تحسن الظروف (تكنولوجيا او رخص مواد) يقلل التكلفة ويزخلي المنتج يضخ كميات اكبر بكل الأسعار، فالمنحنى يزحف لليمين.",
+
+            // Chapter 3 Explanations
+            114: "السعر اللي يتفق عليه البائع والمشتري وتتم بيه البيعة الصدكية بالسوق هو (سعر التوازن).",
+            115: "الكمية اللي ينطوها البائعين وياخذوها المشترين بهالسعر وتصفر السوق، هي الكمية التوازنية.",
+            116: "باقي الاسعار بالجدول مجرد امنيات او خطط.. سعر التوازن هو الوحيد اللي تتساوى بيه الكمية المطلوبة وي المعروضة ويستقر السوق.",
+            117: "اذا السعر طفر عالي.. المشترين يبطلون يشترون (يقل الطلب) والبائعين يكيفون ويجيبون بضاعة اكثر (يزيد العرض)، فيصير فائض بالبضاعة وتتكدس.",
+            118: "من البضاعة تنام على كلوب البائعين (فائض عرض)، يبدون يتنافسون ويسوون خصومات وتخفيضات حتى يمشون شغلهم، فينزل السعر.",
+            119: "اذا السعر نزل كلش.. العالم تهجم تشتري (يزيد الطلب) والتجار يضمون بضاعتهم لان متصرفلهم (يقل العرض)، فتصير أزمة وشحة بالسوق.",
+            120: "بالتوازن، كل قطعة تنعرض تنباع.. فماكو بضاعة زايدة (فائض عرض صفر) وماكو مشتري ما لكه بضاعة (فائض طلب صفر).",
+            121: "شرط التوازن الرياضي والاقتصادي انه الطرفين (المشترين والبائعين) راضين.. فكمية الطلب (Qd) لازم تساوي كمية العرض (Qs).",
+            122: "من نساوي المعادلتين وننقل المتغيرات، تطلع هاي الصيغة الرياضية لحساب سعر التوازن.",
+            123: "من نعوض السعر (P) بأي معادلة، نوصل لهاي الصيغة الرياضية لحساب الكمية التوازنية.",
+            124: "جهاز الأسعار شغلته ينظف السوق: السعر يصعد وينزل لحد ما كل البضاعة تنباع وما يبقى شي، يعني يطهر السوق.",
+            125: "جهاز الاسعار مابيه رحمة ولا يعترف بالمحتاجين! اللي عنده فلوس يدفع ياخذ، واللي ماعنده ما ياخذ حتى لو يموت جوع.",
+            126: "اذا محد تلاعب بالطلب ولا بالعرض وكلشي بقى ثابت.. السعر والكمية التوازنية يبقون مستقرين وما يتغيرون.",
+            127: "اذا الطلب زحف لليمين (زاد) والعرض ثابت.. المنافسة عالشراء تزيد، واكيد السعر التوازني راح يرتفع.",
+            128: "اذا الطلب تراجع لليسار (قل) والعرض بقى نفسه.. البضاعة تتكدس والتجار يضطرون ينزلون السعر.",
+            129: "اذا العرض زحف لليمين (زادت البضاعة) والطلب ثابت.. السوق يغرك بالسلع والسعر التوازني ينكسر وينزل.",
+            130: "اذا العرض تراجع لليسار (شحة بضاعة) والطلب نفسه.. الازمة تخلي السعر يشتعل ويرتفع.",
+            131: "السعر يطفر لأعلى نقطة بحالة وحدة: طلب الناس يرتفع بقوة لليمين + البضاعة تشح وتتراجع لليسار بالوقت نفسه!",
+            132: "السعر ينكسر لأدنى نقطة اذا: الناس بطلت تشتري (طلب انحسر) + التجار غركوا السوق بضاعة (عرض زاد)!",
+            133: "اذا الاثنين تحركوا بنفس الاتجاه.. التوازن الجديد يعتمد على ياهو تحرك اسرع وأقوى (الصافي).",
+            134: "الطلب زاد 12، والعرض زاد 7.. الفرق بيناتهم 5% لصالح الطلب.. فكأنما الطلب زاد وحده بنسبة 5%.",
+            135: "بما انه الصافي هو (زيادة بالطلب 5%).. واكيد زيادة الطلب ترفع السعر وتخليه يصعد.",
+            136: "الطلب نزل 8%، والعرض نزل 11%.. العرض تراجع بنسبة اكبر (فرق 3%).. فتبين كانما العرض هو اللي نزل 3%.",
+            137: "بما انه الصافي هو (انخفاض بالعرض 3%).. فشحة البضاعة تخلي السعر يصعد.",
+            138: "الطلب زاد 6% والعرض زاد 10%.. العرض زاد بنسبة اكبر (فرق 4%).. فكانما العرض لوحده زاد 4%.",
+            139: "بما انه الصافي هو (زيادة العرض 4%).. كثرة البضاعة بالسوق تخلي السعر ينزل.",
+            140: "قانون الطلب يكول: السعر يصعد، الشراء ينزل. العلاقة عكسية للسلع الاعتيادية.",
+            141: "قانون العرض يكول: السعر يصعد، التاجر يكيف ويعرض بضاعة اكثر. العلاقة طردية.",
+            142: "ايد وحدة ما تصفگ! العرض بوحده والطلب بوحده مجرد رغبات.. التوازن والسعر الفعلي ما يبين الا يتفاعلون سوة.",
+            143: "من السعر غالي (600).. التجار جابو 19 الف حبة، بس الناس رادت تشتري بس 5 الاف.. فالفرق صار بضاعة مكدسة (فائض عرض).",
+            144: "من السعر رخيص (100).. الناس هجمت رادت 19 الف، بس التجار ما صرفلهم جابو بس 1500.. فصارت ازمة (شحة عرض).",
+            145: "فوق التوازن (عند H) خط العرض يكون أبعد يميناً من خط الطلب.. والمسافة الافقية بيناتهم تمثل فائض البضاعة المكدسة.",
+            146: "تحت التوازن (عند C) خط الطلب أبعد يميناً من العرض.. والمسافة تمثل شحة البضاعة وكمية الطلب اللي ما متلبي.",
+            147: "التوازن يستقر ما دام ظروف السوق (الدخل، الاذواق، التكنولوجيا) نايمة وثابتة. اذا تحركت يتحرك التوازن.",
+            148: "الرموز (a, b, c, d) بالرياضيات تتسمى معلمات (Parameters).. وهي الأرقام الثابتة اللي تحدد شكل وميل الدالة.",
+            149: "الحروف المضروبة بـ P اللي هي (b و d) تمثل نسبة التغير بالكمية مقابل السعر، يعني تحدد انحدار او (ميل) المنحنى.",
+            150: "جهاز الأسعار مبرمج يخدم اللي بجيبه فلوس! اذا محتاج دوة وماعندك فلوس الدوة يعتبر طلبك ما موجود.",
+            151: "بسبب انه السوق ينطي للي يدفع اكثر مو للي محتاج اكثر.. تتدخل الدولة تسوي دعم وبطاقة تموينية وتسعيرة اجبارية حتى تسند الفقير.",
+            152: "ظروف الطلب تتعلق بالمستهلك: جيبه (الدخل)، مزاجه (الذوق)، عدد عائلته وحجم السكان، واسعار السلع البديلة والمكملة.",
+            153: "ظروف العرض تخص التاجر: التكنولوجيا اللي يصنع بيها، اسعار مواده الأولية، والضرائب والإعانات من الدولة.",
+            154: "زيادة الطلب بيانياً معناها المنحنى يزحف كله لليمين، ولأن المنافسة زادت، نقطة التقاطع راح تصعد ليفوك (يرتفع السعر).",
+            155: "انخفاض الطلب معناه زحف لليسار.. نقطة التقاطع راح تنزل وتتراجع (السعر ينزل).",
+            156: "زيادة العرض (بضاعة هواي) معناه زحف المنحنى لليمين.. البضاعة تغرك السوق ونقطة التقاطع تنزل (السعر ينزل).",
+            157: "انخفاض العرض يعني زحف لليسار (شحة).. نقطة التقاطع تصعد وتتسلق (السعر يرتفع).",
+            158: "هندسياً وعلى الرسم: اي شي يخلي تقاطع (المقص) يصعد لي فوك، يعني السعر التوازني ديصعد.",
+            159: "واي شي يخلي التقاطع ينزل لي جوة بالرسم البياني، معناها السعر التوازني ديطيح وينزل."
+        };
+
+        // --- APP STATE ---
+        let state = {
+            activeChapter: null, // null = all
+            mode: 'study', // study or exam
+            timerEnabled: false,
+            shuffleEnabled: true,
+            questions: [],
+            currentIndex: 0,
+            answers: [], // storing user choice index, isCorrect
+            streak: 0,
+            timerInterval: null,
+            timeRemaining: 30,
+            sound: true,
+            stats: JSON.parse(localStorage.getItem('econStats')) || { bestScores: {}, bookmarks: [] }
+        };
+
+        let viewHistory = ['home-view'];
+
+        // --- FEEDBACK MESSAGES ---
+        const msgsCorrect = [
+            "عاشت ايدك! جوابك صح 🔥",
+            "ممتاز! كمل هيج 👏",
+            "صح عليك 💪",
+            "تسلم، جاوبت صح ✅",
+            "كلش زين، مسيطر على السؤال 😎",
+            "إجابة صحيحة، عاشت إيدك 👌",
+            "بطل! كمل 🌟"
+        ];
+        const msgsWrong = [
+            "إجابة غير صحيحة، شوف الشرح جوة 👇",
+            "مو هاي، بس لا تزعل، اقرا التوضيح 📖",
+            "قربت، ركز بالشرح وراح تثبتها 💡",
+            "غلط هالمرة، وتعلمنا منها 🤝",
+            "مو صحيحة، راجع التوضيح أدناه 📚",
+            "ما صارت، المهم تفهم السبب 👇"
+        ];
+
+        // --- AUDIO ENGINE ---
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx;
+        
+        function playSound(type) {
+            if (!state.sound) return;
+            try {
+                if (!audioCtx) audioCtx = new AudioContext();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                
+                const osc = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                osc.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                
+                if (type === 'correct') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.1);
+                    gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+                    osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+                } else if (type === 'wrong') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.2);
+                    gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+                    osc.start(); osc.stop(audioCtx.currentTime + 0.2);
+                }
+            } catch (e) {
+                console.warn("Audio blocked by browser:", e);
+            }
+        }
+
+        function toggleSound() {
+            state.sound = !state.sound;
+            const icon = document.getElementById('soundToggle');
+            icon.className = state.sound ? "fa-solid fa-volume-high" : "fa-solid fa-volume-xmark";
+            if(state.sound && !audioCtx) {
+                try { audioCtx = new AudioContext(); } catch(e){}
+            }
+        }
+
+        // --- CORE FUNCTIONS ---
+        function saveStats() {
+            localStorage.setItem('econStats', JSON.stringify(state.stats));
+        }
+
+        function switchView(viewId) {
+            if (viewHistory[viewHistory.length - 1] !== viewId) {
+                viewHistory.push(viewId);
+            }
+            document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+            window.scrollTo(0,0);
+        }
+
+        function goBack() {
+            if (viewHistory.length > 1) {
+                viewHistory.pop(); // remove current
+                const prev = viewHistory[viewHistory.length - 1];
+                document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+                document.getElementById(prev).classList.add('active');
+                window.scrollTo(0,0);
+            } else {
+                goHome(true); // force home
+            }
+        }
+
+        function goHome(force = false) {
+            if (!force && viewHistory[viewHistory.length - 1] === 'quiz-view' && state.questions.length > 0) {
+                if (!confirm("متأكد تريد تطلع؟ راح يطير امتحانك الحالي!")) return;
+            }
+            clearInterval(state.timerInterval);
+            document.getElementById('feedback-box').style.display = 'none';
+            viewHistory = ['home-view'];
+            state.questions = []; // clear current quiz
+            renderHome();
+            document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+            document.getElementById('home-view').classList.add('active');
+            window.scrollTo(0,0);
+        }
+
+        function renderHome() {
+            const grid = document.getElementById('chapters-grid');
+            grid.innerHTML = '';
+            CHAPTERS.forEach(chap => {
+                const qCount = ALL_QUESTIONS.filter(q => q.chapter === chap.id).length;
+                const best = state.stats.bestScores[chap.id] || 0;
+                
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.onclick = () => setupQuiz(chap.id);
+                card.innerHTML = `
+                    <h3>${chap.title}</h3>
+                    <div class="stats">
+                        <span><i class="fa-solid fa-clipboard-question"></i> ${qCount} سؤال</span>
+                        <span style="color:var(--success)"><i class="fa-solid fa-trophy"></i> الأفضل: ${best}%</span>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function setupQuiz(chapterId) {
+            state.activeChapter = chapterId;
+            const title = chapterId === 'all' ? "امتحان شامل" : CHAPTERS.find(c => c.id === chapterId).title;
+            document.getElementById('setup-title').innerText = title;
+            switchView('quiz-setup-view');
+        }
+
+        function shuffleArray(array) {
+            let arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function startQuiz(wrongOnly = false) {
+            state.timerEnabled = document.getElementById('timer-toggle').checked;
+            state.shuffleEnabled = document.getElementById('shuffle-toggle').checked;
+            
+            let qs = [];
+            if (wrongOnly) {
+                // Collect wrong answers from current state
+                qs = state.answers.filter(a => !a.isCorrect).map(a => a.q);
+            } else {
+                if (state.activeChapter === 'all') qs = [...ALL_QUESTIONS];
+                else qs = ALL_QUESTIONS.filter(q => q.chapter === state.activeChapter);
+            }
+
+            if (state.shuffleEnabled) qs = shuffleArray(qs);
+            
+            // Limit to 50 max for all chapters to not exhaust user
+            if(state.activeChapter === 'all' && qs.length > 50) qs = qs.slice(0, 50);
+
+            // Pre-process questions to shuffle options if needed
+            state.questions = qs.map(q => {
+                let opts = q.options.map((text, i) => ({text, isCorrect: i === q.correctIndex}));
+                if(state.shuffleEnabled) opts = shuffleArray(opts);
+                return {...q, opts};
+            });
+
+            state.currentIndex = 0;
+            state.answers = [];
+            state.streak = 0;
+            
+            document.getElementById('tools-bar').style.display = 'flex';
+            document.getElementById('timer').style.display = state.timerEnabled ? 'block' : 'none';
+            
+            switchView('quiz-view');
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            clearInterval(state.timerInterval);
+            const q = state.questions[state.currentIndex];
+            
+            document.getElementById('q-counter').innerText = `السؤال ${state.currentIndex + 1} من ${state.questions.length}`;
+            document.getElementById('progress-bar').style.width = `${((state.currentIndex) / state.questions.length) * 100}%`;
+            
+            // Add ID for context to user
+            document.getElementById('question-text').innerHTML = `<span style="color:var(--primary); font-size:0.9rem;">(سؤال ${q.id})</span><br>` + q.question;
+            
+            const isBookmarked = state.stats.bookmarks.includes(q.id);
+            const bBtn = document.getElementById('btn-bookmark');
+            bBtn.className = `fa-solid fa-bookmark bookmark-btn ${isBookmarked ? 'active' : ''}`;
+
+            const optsCont = document.getElementById('options-container');
+            optsCont.innerHTML = '';
+            
+            const letters = ['أ', 'ب', 'ج', 'د'];
+            q.opts.forEach((opt, idx) => {
+                const optEl = document.createElement('div');
+                optEl.className = 'option';
+                optEl.onclick = () => handleAnswer(idx);
+                // Extracting just the text without the old letter
+                let cleanText = opt.text.replace(/^[أبجدهـ][.)]\s*/, '');
+                
+                optEl.innerHTML = `<div class="opt-letter">${letters[idx]}</div> <div>${cleanText}</div>`;
+                optsCont.appendChild(optEl);
+            });
+
+            document.getElementById('feedback-box').style.display = 'none';
+            document.getElementById('btn-next').style.display = 'none';
+            document.getElementById('btn-hint').style.display = 'block';
+
+            // Typeset MathJax safely
+            try {
+                if(window.MathJax && window.MathJax.typesetPromise) {
+                    MathJax.typesetPromise([document.getElementById('question-text'), optsCont]).catch(e => console.warn(e));
+                }
+            } catch (e) {}
+
+            if (state.timerEnabled) {
+                state.timeRemaining = 30;
+                document.getElementById('timer').innerText = `00:30`;
+                state.timerInterval = setInterval(() => {
+                    state.timeRemaining--;
+                    document.getElementById('timer').innerText = `00:${state.timeRemaining.toString().padStart(2,'0')}`;
+                    if(state.timeRemaining <= 0) {
+                        clearInterval(state.timerInterval);
+                        // Auto fail
+                        handleAnswer(-1); // timeout
+                    }
+                }, 1000);
+            }
+        }
+
+        function handleAnswer(selectedIndex) {
+            clearInterval(state.timerInterval);
+            
+            const q = state.questions[state.currentIndex];
+            const isTimeout = selectedIndex === -1;
+            const isCorrect = !isTimeout && q.opts[selectedIndex].isCorrect;
+            const actualCorrectIndex = q.opts.findIndex(o => o.isCorrect);
+
+            state.answers.push({
+                q: q,
+                userAnswer: isTimeout ? null : q.opts[selectedIndex].text,
+                isCorrect: isCorrect,
+                correctText: q.opts[actualCorrectIndex].text
+            });
+
+            const optEls = document.querySelectorAll('.option');
+            optEls.forEach(el => el.classList.add('disabled'));
+
+            if (!isTimeout) optEls[selectedIndex].classList.add(isCorrect ? 'correct' : 'wrong');
+            optEls[actualCorrectIndex].classList.add('correct'); // always show correct
+
+            const fbBox = document.getElementById('feedback-box');
+            const fbTitle = document.getElementById('feedback-title');
+            const fbExpl = document.getElementById('feedback-expl');
+
+            // 1) Show title + explanation + next button FIRST (so nothing can block them)
+            let titleMsg = '';
+            if (isTimeout) {
+                titleMsg = "⏰ خلص الوقت!";
+            } else if (isCorrect) {
+                titleMsg = msgsCorrect[Math.floor(Math.random() * msgsCorrect.length)];
+            } else {
+                titleMsg = msgsWrong[Math.floor(Math.random() * msgsWrong.length)];
+            }
+
+            fbBox.className = `feedback-box ${isCorrect ? 'success' : 'error'}`;
+            fbBox.style.display = 'block';
+            fbTitle.innerHTML = `<i class="fa-solid fa-${isCorrect ? 'check-circle' : 'circle-xmark'}"></i> ${titleMsg}`;
+
+            // Detailed custom explanation from dict
+            let explText = EXPLANATIONS[q.id] || "راجع هذا المبدأ زين حتى ما تغلط بيه بالامتحان.";
+            fbExpl.innerHTML = `<b>التوضيح:</b> ${explText}`;
+
+            document.getElementById('btn-next').style.display = 'block';
+            document.getElementById('btn-hint').style.display = 'none';
+
+            // 2) Streak + sounds + effects (each protected so a failure can't break the page)
+            if (isCorrect) state.streak++; else state.streak = 0;
+            try { updateStreakUI(); } catch (e) { console.warn(e); }
+            try { playSound(isCorrect ? 'correct' : 'wrong'); } catch (e) { console.warn(e); }
+            try { if (isCorrect && state.streak > 2) triggerConfetti(); } catch (e) { console.warn(e); }
+            try { if (!isCorrect && navigator.vibrate) navigator.vibrate([50, 50, 50]); } catch (e) {}
+
+            // 3) MathJax for the explanation
+            try {
+                if (window.MathJax && window.MathJax.typesetPromise) {
+                    MathJax.typesetPromise([fbExpl]).catch(e => console.warn(e));
+                }
+            } catch (e) {}
+
+            // Make sure the explanation is visible on small screens
+            try { fbBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } catch (e) {}
+        }
+
+        function updateStreakUI() {
+            const sb = document.getElementById('streak-box');
+            if (state.streak >= 2) {
+                sb.style.display = 'flex';
+                document.getElementById('streak-count').innerText = state.streak;
+                sb.style.animation = 'none';
+                setTimeout(() => sb.style.animation = 'fadeIn 0.3s', 10);
+            } else {
+                sb.style.display = 'none';
+            }
+        }
+
+        function showHint() {
+            const q = state.questions[state.currentIndex];
+            const wrongOptions = q.opts.map((o,i) => ({...o, i})).filter(o => !o.isCorrect);
+            if(wrongOptions.length >= 2) {
+                // hide two wrong options
+                const optEls = document.querySelectorAll('.option');
+                optEls[wrongOptions[0].i].style.opacity = '0.3';
+                optEls[wrongOptions[0].i].classList.add('disabled');
+                optEls[wrongOptions[1].i].style.opacity = '0.3';
+                optEls[wrongOptions[1].i].classList.add('disabled');
+            }
+            document.getElementById('btn-hint').style.display = 'none';
+        }
+
+        function nextQuestion() {
+            state.currentIndex++;
+            if (state.currentIndex < state.questions.length) {
+                renderQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        function triggerConfetti() {
+            try {
+                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+            } catch(e){}
+        }
+
+        function toggleBookmark() {
+            const qId = state.questions[state.currentIndex].id;
+            const idx = state.stats.bookmarks.indexOf(qId);
+            if(idx > -1) state.stats.bookmarks.splice(idx, 1);
+            else state.stats.bookmarks.push(qId);
+            
+            saveStats();
+            const bBtn = document.getElementById('btn-bookmark');
+            bBtn.classList.toggle('active');
+        }
+
+        function showResult() {
+            const correctCount = state.answers.filter(a => a.isCorrect).length;
+            const total = state.questions.length;
+            const percent = Math.round((correctCount / total) * 100);
+
+            // Update best score
+            if (state.activeChapter !== 'all') {
+                const currBest = state.stats.bestScores[state.activeChapter] || 0;
+                if (percent > currBest) {
+                    state.stats.bestScores[state.activeChapter] = percent;
+                    saveStats();
+                }
+            }
+
+            // Pass mark = 50%.  Below it = fail (no praise), then Iraqi grade names above it.
+            const RANKS = [
+                { max: 19,  pass: false, rank: "راسب - لازم تبدي من الأساسيات 📚",
+                  descs: ["لا تزعل، هاي أول محاولة. اقرا الشروحات زين وارجع جرب مرة ثانية.",
+                          "النتيجة هالمرة ضعيفة، بس بالمراجعة الصحيحة تتحسن بسرعة. ابدأ من الفصل الأول."] },
+                { max: 34,  pass: false, rank: "راسب - تحتاج مراجعة جدية 📖",
+                  descs: ["لسه بعيد عن النجاح، بس الحل بسيط: راجع الأسئلة الغلط وافهم شرحها.",
+                          "ركز على الأسئلة اللي غلطت بيها وارجع جرب، التحسن يبين بسرعة."] },
+                { max: 49,  pass: false, rank: "راسب بفارق بسيط 😬",
+                  descs: ["كلش قريب من النجاح! شوية مراجعة للأخطاء وتعدي إن شاء الله.",
+                          "ناقصك شوية بس. راجع الأسئلة الغلط وجرب مرة ثانية."] },
+                { max: 59,  pass: true,  rank: "مقبول - ناجح بالدعوات 🤲",
+                  descs: ["نجحت، بس على الحافة. شوية مراجعة وتطلع بدرجة أحسن.",
+                          "عديت الحد الأدنى، بس تكدر تجيب أعلى بكثير."] },
+                { max: 69,  pass: true,  rank: "متوسط - طالب مثابر 📖",
+                  descs: ["نتيجة زينة، كمل مراجعة وراح تتحسن أكثر.",
+                          "على الطريق الصحيح، ركز على الأسئلة اللي غلطت بيها."] },
+                { max: 79,  pass: true,  rank: "جيد 👍",
+                  descs: ["عاشت ايدك، مستواك زين. شوية تفاصيل وتوصل للامتياز.",
+                          "نتيجة حلوة، باقي لك شوية وتصير ممتاز."] },
+                { max: 89,  pass: true,  rank: "جيد جداً - وحش الدفعة 🔥",
+                  descs: ["أداء كلش قوي، عاشت ايدك!",
+                          "مسيطر على المادة تقريباً، شد حيلك على الباقي."] },
+                { max: 100, pass: true,  rank: "امتياز - عبقري الزمان 👑",
+                  descs: ["ما شاء الله، نتيجة ممتازة! تستاهل التهنئة.",
+                          "مستوى عالي جداً، استمر هيج."] }
+            ];
+            const tier = RANKS.find(r => percent <= r.max) || RANKS[RANKS.length - 1];
+            const rank = tier.rank;
+            const desc = tier.descs[Math.floor(Math.random() * tier.descs.length)];
+            if (percent >= 90) { triggerConfetti(); setTimeout(triggerConfetti, 1000); }
+
+            // Visual cue: red when failed, blue when passed
+            const ringColor = tier.pass ? 'var(--primary)' : 'var(--danger)';
+            document.getElementById('rank-title').style.color = tier.pass ? 'var(--warning)' : 'var(--danger)';
+
+            document.getElementById('score-percent').innerText = `${percent}%`;
+            document.getElementById('score-circle').style.background = `conic-gradient(${ringColor} ${percent}%, var(--border) ${percent}%)`;
+            document.getElementById('rank-title').innerText = rank;
+            document.getElementById('rank-desc').innerText = desc;
+            document.getElementById('stat-correct').innerText = correctCount;
+            document.getElementById('stat-wrong').innerText = total - correctCount;
+
+            const retryWrongBtn = document.getElementById('btn-retry-wrong');
+            retryWrongBtn.style.display = (correctCount < total) ? 'block' : 'none';
+
+            switchView('result-view');
+        }
+
+        function retryWrong() {
+            startQuiz(true);
+        }
+
+        function shareResult() {
+            const correct = state.answers.filter(a => a.isCorrect).length;
+            const total = state.questions.length;
+            const percent = Math.round((correct / total) * 100);
+            const rank = document.getElementById('rank-title').innerText;
+            const text = `جبت ${percent}% (${correct}/${total}) باختبار الاقتصاد!\nاللقب: ${rank}\nجرب تختبر نفسك بمنصة الاقتصاد الذكية 🔥`;
+            
+            if (navigator.share) {
+                navigator.share({ title: 'نتيجتي باختبار الاقتصاد', text: text }).catch(e=>console.warn(e));
+            } else {
+                navigator.clipboard.writeText(text).catch(e=>console.warn(e));
+                alert("تم نسخ النتيجة للحافظة!");
+            }
+        }
+
+        function showReview() {
+            document.getElementById('filter-wrong-cb').checked = false;
+            renderReview();
+            switchView('review-view');
+        }
+
+        function renderReview() {
+            const list = document.getElementById('review-list');
+            const onlyWrong = document.getElementById('filter-wrong-cb').checked;
+            list.innerHTML = '';
+
+            state.answers.forEach((ans, i) => {
+                if (onlyWrong && ans.isCorrect) return;
+
+                let uAnsClean = ans.userAnswer ? ans.userAnswer.replace(/^[أبجدهـ][.)]\s*/, '') : 'لم تتم الإجابة';
+                let cAnsClean = ans.correctText.replace(/^[أبجدهـ][.)]\s*/, '');
+                let explText = EXPLANATIONS[ans.q.id] || "شرح غير متوفر حالياً.";
+
+                const el = document.createElement('div');
+                el.className = `review-item ${ans.isCorrect ? '' : 'wrong'}`;
+                el.innerHTML = `
+                    <div class="review-q">Q${ans.q.id}: ${ans.q.question}</div>
+                    <div class="review-ans ${ans.isCorrect ? 'correct-text' : 'wrong-text'}">إجابتك: ${uAnsClean}</div>
+                    ${!ans.isCorrect ? `<div class="review-ans correct-text">الصح: ${cAnsClean}</div>` : ''}
+                    <div style="margin-top:10px; font-size:0.9rem; color:var(--text-muted); border-top:1px solid rgba(255,255,255,0.1); padding-top:10px;">
+                        <b>التوضيح:</b> ${explText}
+                    </div>
+                `;
+                list.appendChild(el);
+            });
+            
+            try {
+                if(window.MathJax && window.MathJax.typesetPromise) {
+                    MathJax.typesetPromise([list]).catch(e=>console.warn(e));
+                }
+            } catch(e){}
+        }
+
+        function showBookmarks() {
+            const list = document.getElementById('bookmarks-list');
+            list.innerHTML = '';
+            
+            if(state.stats.bookmarks.length === 0) {
+                list.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-muted);">ماكو أي سؤال محفوظ حالياً.</div>';
+            } else {
+                state.stats.bookmarks.forEach((bId, idx) => {
+                    const q = ALL_QUESTIONS.find(xq => xq.id === bId);
+                    if(!q) return;
+                    
+                    const cAnsClean = q.options[q.correctIndex].replace(/^[أبجدهـ][.)]\s*/, '');
+                    let explText = EXPLANATIONS[q.id] || "شرح غير متوفر حالياً.";
+                    
+                    const el = document.createElement('div');
+                    el.className = `review-item`;
+                    el.style.borderLeftColor = 'var(--warning)';
+                    el.innerHTML = `
+                        <div style="display:flex; justify-content:space-between;">
+                            <span style="font-size:0.8rem; color:var(--text-muted)">الفصل ${q.chapter} - سؤال ${q.id}</span>
+                            <i class="fa-solid fa-trash" style="color:var(--danger); cursor:pointer;" onclick="removeBookmark(${q.id})"></i>
+                        </div>
+                        <div class="review-q" style="margin-top:10px;">${q.question}</div>
+                        <div class="review-ans correct-text">الجواب: ${cAnsClean}</div>
+                        <div style="margin-top:10px; font-size:0.9rem; color:var(--text-muted); border-top:1px solid rgba(255,255,255,0.1); padding-top:10px;">
+                            <b>التوضيح:</b> ${explText}
+                        </div>
+                    `;
+                    list.appendChild(el);
+                });
+            }
+            
+            try {
+                if(window.MathJax && window.MathJax.typesetPromise) {
+                    MathJax.typesetPromise([list]).catch(e=>console.warn(e));
+                }
+            } catch(e){}
+            switchView('bookmarks-view');
+        }
+
+        function removeBookmark(id) {
+            const idx = state.stats.bookmarks.indexOf(id);
+            if(idx > -1) state.stats.bookmarks.splice(idx, 1);
+            saveStats();
+            showBookmarks(); // re-render
+        }
+
+        // Init
+        window.onload = () => {
+            renderHome();
+        };
+
+    </script>
+</body>
+</html>
